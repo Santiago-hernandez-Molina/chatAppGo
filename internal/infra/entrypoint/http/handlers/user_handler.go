@@ -44,7 +44,7 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		userWithToken.Token,
 		14_400,
 		"/",
-		"localhost",
+		"",
 		false,
 		true,
 	)
@@ -59,8 +59,8 @@ func (uh *UserHandler) Register(c *gin.Context) {
 	request := dtos.RegisterRequest{}
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Something wnet wrong reading json",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Error reading data",
 		})
 	}
 	err = uh.UserService.Register(&models.User{
@@ -69,7 +69,9 @@ func (uh *UserHandler) Register(c *gin.Context) {
 		Password: request.Password,
 	})
 	if err != nil {
-		http.Error(c.Writer, err.Error(), http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{

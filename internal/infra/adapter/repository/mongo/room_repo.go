@@ -16,8 +16,24 @@ type RoomRepo struct {
 	mongoRepo  *MongoRepo
 }
 
-func (*RoomRepo) AddUserToRoom(userId int, roomId int) error {
-	panic("unimplemented")
+func (repo *RoomRepo) AddUserToRoom(userId int, roomId int) error {
+	filter := bson.D{{Key: "_id", Value: roomId}}
+	update := bson.D{{
+		Key: "$push",
+		Value: bson.D{
+			{
+				Key: "users", Value: bson.D{
+					{Key: "userid", Value: userId},
+					{Key: "role", Value: "user"},
+				},
+			},
+		},
+	}}
+	_, err := repo.collection.UpdateOne(repo.ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 var _ ports.RoomRepo = (*RoomRepo)(nil)

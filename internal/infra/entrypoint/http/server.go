@@ -1,6 +1,8 @@
 package http
 
 import (
+	"slices"
+
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/middlewares"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
@@ -52,11 +54,16 @@ func (server *Server) Start() {
 func (server *Server) globalMiddlewares(app *gin.Engine) {
 	config := cors.DefaultConfig()
 	config.AllowHeaders = []string{"Origin", "Content-Type"}
-	config.AllowOrigins = []string{"http://localhost:5173"}
+	config.AllowOrigins = []string{"http://localhost:5173", "http://192.168.0.4:5173"}
 	config.AllowMethods = []string{"POST", "GET"}
 	config.AllowCredentials = true
 	config.AllowOriginFunc = func(origin string) bool {
-		return origin == "http://localhost:5173"
+		return slices.Contains[[]string](
+			[]string{
+				"http://localhost:5173",
+				"http://192.168.0.4:5173",
+			}, origin,
+		)
 	}
 
 	app.SetTrustedProxies([]string{"localhost"})
@@ -70,7 +77,7 @@ func (server *Server) authRoutes(app *gin.Engine) {
 	app.POST("login", server.userHandler.Login)
 }
 
-//Room Routes
+// Room Routes
 func (server *Server) roomRoutes(app *gin.RouterGroup) {
 	roomRoutes := app.Group("/room")
 	accessUserRoom := roomRoutes.Group(
@@ -80,7 +87,7 @@ func (server *Server) roomRoutes(app *gin.RouterGroup) {
 			"user",
 		}),
 	)
-	var _ *gin.RouterGroup = roomRoutes.Group(
+	var adminRoutes *gin.RouterGroup = roomRoutes.Group(
 		"",
 		server.roomAccessMiddleware.VerifyRoomAccess([]string{
 			"admin",
@@ -90,9 +97,10 @@ func (server *Server) roomRoutes(app *gin.RouterGroup) {
 	roomRoutes.POST("/new", server.roomHandler.NewRoom)
 	accessUserRoom.GET("/ws/:roomid", server.hubManager.HandleHubs)
 	accessUserRoom.GET("/show/:roomid", server.roomHandler.GetRoomById)
+	adminRoutes.POST("/:roomid/add-user", server.roomHandler.AddUserToRoom)
 }
 
-//Messages Routes
+// Messages Routes
 func (server *Server) messagesRoutes(app *gin.RouterGroup) {
 	messageRoutes := app.Group("/message")
 	accessRoomMessages := messageRoutes.Group(

@@ -9,8 +9,13 @@ type RoomService struct {
 	repo ports.RoomRepo
 }
 
-func (*RoomService) AddUserToRoom(userId int, roomId int) error {
-	panic("unimplemented")
+func (service *RoomService) AddUserToRoom(userId int, roomId int) error {
+    err := service.repo.AddUserToRoom(userId, roomId)
+    if err != nil {
+        return err
+    }
+
+    return nil
 }
 
 

@@ -10,9 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 type RoomHandler struct {
-	sessionManager ports.SessionManager
+	sessionManager  ports.SessionManager
 	roomService     ports.RoomService
 	messagesService ports.MessageService
 }
@@ -24,7 +23,7 @@ func NewRoomHandler(
 	roomService ports.RoomService,
 ) *RoomHandler {
 	return &RoomHandler{
-		roomService:     roomService,
+		roomService:    roomService,
 		sessionManager: sessionManager,
 	}
 }
@@ -43,8 +42,28 @@ func (rh *RoomHandler) GetRoomById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, room)
 }
 
-func (rh *RoomHandler) AddUserToRoom(ctx *gin.Context) {
-	panic("not implemented")
+func (handler *RoomHandler) AddUserToRoom(ctx *gin.Context) {
+	userRoom := models.UserRoom{}
+	roomParam := ctx.Param("roomid")
+	roomId, _ := strconv.Atoi(roomParam)
+
+	err := ctx.BindJSON(&userRoom)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "cannot read the user",
+		})
+		return
+	}
+	err = handler.roomService.AddUserToRoom(userRoom.UserId, roomId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Error adding new user check your data",
+		})
+		return
+	}
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "User added sucessfully",
+	})
 }
 
 func (handler *RoomHandler) GetRoomsByUserId(ctx *gin.Context) {
@@ -61,7 +80,6 @@ func (handler *RoomHandler) GetRoomsByUserId(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, rooms)
 }
-
 
 func (handler *RoomHandler) NewRoom(ctx *gin.Context) {
 	cookieAuth, _ := ctx.Request.Cookie("Authorization")

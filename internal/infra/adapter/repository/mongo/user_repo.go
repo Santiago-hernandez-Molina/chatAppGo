@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 	"go.mongodb.org/mongo-driver/bson"
@@ -32,10 +33,12 @@ func (ur *UserRepo) Register(user *models.User) error {
 	user.Id = userId
 	_, err := ur.collection.InsertOne(context.TODO(), user)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return &exceptions.DuplicatedUser{}
+		}
 		return err
-	} else {
-		return nil
 	}
+	return nil
 }
 
 var _ ports.UserRepo = (*UserRepo)(nil)

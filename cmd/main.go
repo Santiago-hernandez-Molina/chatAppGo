@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/services"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/authentication"
@@ -11,14 +12,21 @@ import (
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/handlers"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/middlewares"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	jwtSecret := "qwertyui123456"
+    err := godotenv.Load()
+    if err != nil {
+        log.Fatal("Error reading env")
+    }
+	SECRET := os.Getenv("SECRET")
+    USERDB := os.Getenv("USER_DB")
+    PASSWORDDB := os.Getenv("PASSWORD_DB")
 	ctx := context.Background()
 
 	// repos
-	cs := "mongodb://user_admin:123456@localhost:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false"
+    cs := "mongodb://"+USERDB+":"+PASSWORDDB+"@localhost:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false"
 	mongoRepo, err := mongo.NewRepo(cs)
 	if err != nil {
 		log.Fatal(err)
@@ -28,7 +36,7 @@ func main() {
 	userRepo := mongo.NewUserRepo(mongoRepo, ctx)
 
 	// AuthManager
-	sessionManager := authentication.NewSessionManager(jwtSecret)
+	sessionManager := authentication.NewSessionManager(SECRET)
 	passwordManager := authentication.NewPasswordManager()
 
 	// services
