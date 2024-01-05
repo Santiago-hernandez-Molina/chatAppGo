@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -12,21 +13,16 @@ import (
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/handlers"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/middlewares"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-    err := godotenv.Load()
-    if err != nil {
-        log.Fatal("Error reading env")
-    }
 	SECRET := os.Getenv("SECRET")
-    USERDB := os.Getenv("USER_DB")
-    PASSWORDDB := os.Getenv("PASSWORD_DB")
+	USERDB := os.Getenv("USER_DB")
+	PASSWORDDB := os.Getenv("PASSWORD_DB")
 	ctx := context.Background()
 
 	// repos
-    cs := "mongodb://"+USERDB+":"+PASSWORDDB+"@localhost:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false"
+	cs := fmt.Sprintf("mongodb+srv://%v:%v@chatapp.nsdqqou.mongodb.net/?retryWrites=true&w=majority", USERDB, PASSWORDDB)
 	mongoRepo, err := mongo.NewRepo(cs)
 	if err != nil {
 		log.Fatal(err)
