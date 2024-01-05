@@ -29,7 +29,7 @@ func main() {
 	ctx := context.Background()
 
 	// repos
-	cs := fmt.Sprintf("mongodb+srv://%v:%v@chatapp.nsdqqou.mongodb.net/?retryWrites=true&w=majority&tlsInsecure=true&authSource=admin", USERDB, PASSWORDDB)
+	cs := fmt.Sprintf("mongodb://%v:%v@chatapp.nsdqqou.mongodb.net/?retryWrites=true&w=majority&tlsInsecure=true&authSource=admin", USERDB, PASSWORDDB)
 	mongoRepo, err := mongo.NewRepo(cs)
 	if err != nil {
 		log.Fatal("err", err)
