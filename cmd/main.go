@@ -13,9 +13,16 @@ import (
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/handlers"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/middlewares"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if os.Getenv("APP_ENV") != "prod" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatal("ENV")
+		}
+	}
 	SECRET := os.Getenv("SECRET")
 	USERDB := os.Getenv("USER_DB")
 	PASSWORDDB := os.Getenv("PASSWORD_DB")
@@ -25,7 +32,7 @@ func main() {
 	cs := fmt.Sprintf("mongodb+srv://%v:%v@chatapp.nsdqqou.mongodb.net/?retryWrites=true&w=majority", USERDB, PASSWORDDB)
 	mongoRepo, err := mongo.NewRepo(cs)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("err", err)
 	}
 	roomRepo := mongo.NewRoomRepo(mongoRepo, ctx)
 	messageRepo := mongo.NewMessageRepo(mongoRepo, ctx)

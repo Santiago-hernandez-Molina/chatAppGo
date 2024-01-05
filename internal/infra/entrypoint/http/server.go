@@ -38,6 +38,7 @@ func NewServer(
 }
 
 func (server *Server) Start() {
+    gin.SetMode(gin.ReleaseMode)
 	app := gin.Default()
 	server.globalMiddlewares(app)
 
