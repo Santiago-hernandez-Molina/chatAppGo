@@ -43,8 +43,8 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		"Authorization",
 		userWithToken.Token,
 		14_400,
-		"",
-        "",
+		"/",
+        ".netlify.app",
 		true,
 		true,
 	)
