@@ -27,9 +27,10 @@ func main() {
 	USERDB := os.Getenv("USER_DB")
 	PASSWORDDB := os.Getenv("PASSWORD_DB")
 	ctx := context.Background()
+	string := "chatapp.nsdqqou.mongodb.net/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false"
 
 	// repos
-	cs := fmt.Sprintf("mongodb://%v:%v@chatapp.nsdqqou.mongodb.net/?retryWrites=true&w=majority&tlsInsecure=true&authSource=admin", USERDB, PASSWORDDB)
+	cs := fmt.Sprintf("mongodb://%v:%v@%v", USERDB, PASSWORDDB, string)
 	mongoRepo, err := mongo.NewRepo(cs)
 	if err != nil {
 		log.Fatal("err", err)
