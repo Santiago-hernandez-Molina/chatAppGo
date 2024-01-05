@@ -38,7 +38,7 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		})
 		return
 	}
-	c.SetSameSite(http.SameSiteStrictMode)
+	c.SetSameSite(http.SameSiteDefaultMode)
 	c.SetCookie(
 		"Authorization",
 		userWithToken.Token,
