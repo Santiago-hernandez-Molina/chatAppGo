@@ -38,12 +38,12 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		})
 		return
 	}
-	c.SetSameSite(http.SameSiteDefaultMode)
+	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
 		"Authorization",
 		userWithToken.Token,
 		14_400,
-		"/",
+		"",
         "",
 		true,
 		true,
