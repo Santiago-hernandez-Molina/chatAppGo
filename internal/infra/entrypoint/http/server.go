@@ -58,7 +58,7 @@ func (server *Server) globalMiddlewares(app *gin.Engine) {
 	config.AllowOrigins = []string{
 		"http://localhost:5173",
 		"http://192.168.0.4:5173",
-		"https://main--golden-paletas-491bf7.netlify.app",
+		"https://chatapp-go-vue.netlify.app",
 	}
 	config.AllowMethods = []string{"POST", "GET"}
 	config.AllowCredentials = true
@@ -67,7 +67,7 @@ func (server *Server) globalMiddlewares(app *gin.Engine) {
 			[]string{
 				"http://localhost:5173",
 				"http://192.168.0.4:5173",
-				"https://main--golden-paletas-491bf7.netlify.app",
+				"https://chatapp-go-vue.netlify.app",
 			}, origin,
 		)
 	}
