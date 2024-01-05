@@ -38,7 +38,7 @@ func NewServer(
 }
 
 func (server *Server) Start() {
-    gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	app := gin.Default()
 	server.globalMiddlewares(app)
 
@@ -55,7 +55,11 @@ func (server *Server) Start() {
 func (server *Server) globalMiddlewares(app *gin.Engine) {
 	config := cors.DefaultConfig()
 	config.AllowHeaders = []string{"Origin", "Content-Type"}
-	config.AllowOrigins = []string{"http://localhost:5173", "http://192.168.0.4:5173"}
+	config.AllowOrigins = []string{
+		"http://localhost:5173",
+		"http://192.168.0.4:5173",
+		"https://main--golden-paletas-491bf7.netlify.app",
+	}
 	config.AllowMethods = []string{"POST", "GET"}
 	config.AllowCredentials = true
 	config.AllowOriginFunc = func(origin string) bool {
@@ -63,6 +67,7 @@ func (server *Server) globalMiddlewares(app *gin.Engine) {
 			[]string{
 				"http://localhost:5173",
 				"http://192.168.0.4:5173",
+				"https://main--golden-paletas-491bf7.netlify.app",
 			}, origin,
 		)
 	}
