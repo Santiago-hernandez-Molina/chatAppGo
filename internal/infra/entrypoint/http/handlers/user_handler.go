@@ -44,7 +44,7 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		userWithToken.Token,
 		14_400,
 		"/",
-        "https://chatapp-go-vue.netlify.app",
+        "",
 		true,
 		true,
 	)
