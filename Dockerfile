@@ -1,7 +1,6 @@
 FROM golang:alpine AS build
 WORKDIR /go/src/chatApp
 COPY . .
-COPY .env ./
 RUN go build -o /go/bin/chatApp cmd/main.go
 
 FROM scratch
