@@ -14,6 +14,7 @@ import (
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/middlewares"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -27,11 +28,13 @@ func main() {
 	USERDB := os.Getenv("USER_DB")
 	PASSWORDDB := os.Getenv("PASSWORD_DB")
 	ctx := context.Background()
-	string := "chatapp.nsdqqou.mongodb.net/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false"
 
 	// repos
-	cs := fmt.Sprintf("mongodb://%v:%v@%v", USERDB, PASSWORDDB, string)
-	mongoRepo, err := mongo.NewRepo(cs)
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	URI := fmt.Sprintf("mongodb+srv://%v:%v@chatapp.nsdqqou.mongodb.net/?retryWrites=true&w=majority", USERDB, PASSWORDDB)
+	opts := options.Client().ApplyURI(URI).SetServerAPIOptions(serverAPI)
+
+	mongoRepo, err := mongo.NewRepo(opts)
 	if err != nil {
 		log.Fatal("err", err)
 	}

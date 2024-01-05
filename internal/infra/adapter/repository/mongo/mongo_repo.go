@@ -33,16 +33,14 @@ func (repo *MongoRepo) FindNextId(ctx context.Context, counterName string) int {
 	return counter.Seq
 }
 
-func NewRepo(conn string) (*MongoRepo, error) {
+func NewRepo(opt *options.ClientOptions) (*MongoRepo, error) {
 	ctx, cancelF := context.WithTimeout(
 		context.Background(),
 		MongoTimeOut*time.Second,
 	)
 	defer cancelF()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(
-		conn,
-	))
+	client, err := mongo.Connect(ctx, opt)
 	if err != nil {
 		return nil, err
 	}
