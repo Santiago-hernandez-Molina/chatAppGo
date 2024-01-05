@@ -38,13 +38,13 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		})
 		return
 	}
-	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie(
 		"Authorization",
 		userWithToken.Token,
 		14_400,
 		"/",
-        "netlify.app",
+        "",
 		true,
 		true,
 	)
