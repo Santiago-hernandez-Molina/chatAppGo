@@ -43,9 +43,9 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		"Authorization",
 		userWithToken.Token,
 		14_400,
-		"/",
-		"https://chatapp-go-vue.netlify.app",
-		false,
+		"",
+		"chatapp-go-vue.netlify.app",
+		true,
 		true,
 	)
 	c.JSON(http.StatusAccepted, &dtos.LoginResponse{
