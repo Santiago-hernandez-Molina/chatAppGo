@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
