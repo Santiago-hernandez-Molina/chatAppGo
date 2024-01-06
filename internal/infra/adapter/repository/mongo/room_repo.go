@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
@@ -79,6 +80,7 @@ func (repo *RoomRepo) GetRoomsByUserId(userId int) ([]models.Room, error) {
 	if err != nil {
 		return nil, err
 	}
+    log.Println(rooms)
 	return rooms, nil
 }
 
