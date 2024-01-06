@@ -68,7 +68,7 @@ func (repo *RoomRepo) NewRoom(room models.Room, userId int) error {
 }
 
 func (repo *RoomRepo) GetRoomsByUserId(userId int) ([]models.Room, error) {
-	filter := bson.M{"users.userid": userId}
+	filter := bson.D{{Key: "users.userid", Value: userId}}
 	rooms := []models.Room{}
 	cursor, err := repo.collection.Find(repo.ctx, filter)
 	if err != nil {
