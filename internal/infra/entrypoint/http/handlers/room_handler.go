@@ -3,10 +3,12 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/dtos"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,6 +16,7 @@ type RoomHandler struct {
 	sessionManager  ports.SessionManager
 	roomService     ports.RoomService
 	messagesService ports.MessageService
+	roomManager     *websockets.RoomManager
 }
 
 var _ ports.RoomHandler = (*RoomHandler)(nil)
@@ -21,18 +24,65 @@ var _ ports.RoomHandler = (*RoomHandler)(nil)
 func NewRoomHandler(
 	sessionManager ports.SessionManager,
 	roomService ports.RoomService,
+	roomManager *websockets.RoomManager,
+	messagesService ports.MessageService,
 ) *RoomHandler {
 	return &RoomHandler{
-		roomService:    roomService,
-		sessionManager: sessionManager,
+		roomService:     roomService,
+		sessionManager:  sessionManager,
+		roomManager:     roomManager,
+		messagesService: messagesService,
 	}
 }
 
-func (rh *RoomHandler) GetRoomById(ctx *gin.Context) {
+func (handler *RoomHandler) ConnectToRoom(ctx *gin.Context) {
+	cookieAuth, _ := ctx.Cookie("Authorization")
+	roomParam := ctx.Param("roomid")
+
+	claims, _ := handler.sessionManager.GetCredentials(cookieAuth)
+	roomId, _ := strconv.Atoi(roomParam)
+
+	hub := handler.roomManager.AddHub(roomId)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if hub != nil {
+			hub.Run()
+			handler.roomManager.RemoveHub(roomId)
+		}
+	}()
+	user := &models.User{
+		Id:       claims.UserId,
+		Username: claims.Username,
+		Email:    claims.Email,
+	}
+	client, err := handler.roomManager.AddClient(
+		ctx,
+		user,
+		roomId,
+		handler.roomManager.Hubs[roomId],
+		handler.messagesService,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "error connecting ws",
+		})
+		return
+	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		client.Run()
+	}()
+	wg.Wait()
+}
+
+func (handler *RoomHandler) GetRoomById(ctx *gin.Context) {
 	roomParam := ctx.Param("roomid")
 	roomId, _ := strconv.Atoi(roomParam)
 
-	room, err := rh.roomService.GetRoomById(roomId)
+	room, err := handler.roomService.GetRoomById(roomId)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"message": "Room not found",

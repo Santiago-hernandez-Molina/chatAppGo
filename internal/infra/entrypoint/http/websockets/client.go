@@ -1,0 +1,76 @@
+package websockets
+
+import (
+	"sync"
+
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
+	"github.com/gorilla/websocket"
+)
+
+type Client struct {
+	id             string
+	conn           *websocket.Conn
+	outbound       chan models.MessageUser
+	hub            *Hub
+	user           *models.User
+	messageService ports.MessageService
+}
+
+func NewClient(conn *websocket.Conn, hub *Hub, user *models.User, messageService ports.MessageService) *Client {
+	return &Client{
+		id:             conn.RemoteAddr().String(),
+		conn:           conn,
+		outbound:       make(chan models.MessageUser),
+		hub:            hub,
+		user:           user,
+		messageService: messageService,
+	}
+}
+
+func (client *Client) Run() {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go client.Read(&wg)
+	go client.Write(&wg)
+	wg.Wait()
+}
+
+func (client *Client) Write(wg *sync.WaitGroup) {
+	defer wg.Done()
+	for message := range client.outbound {
+		err := client.conn.WriteJSON(message)
+		if err != nil {
+			close(client.outbound)
+		}
+	}
+	client.hub.disClient <- client
+}
+
+func (client *Client) Read(wg *sync.WaitGroup) {
+	defer wg.Done()
+	message := models.MessageUser{}
+	for {
+		err := client.conn.ReadJSON(&message)
+		if err != nil {
+			close(client.outbound)
+			client.conn.Close()
+			return
+		}
+		err = client.messageService.SaveMessage(&models.Message{
+			Content: message.Content,
+			UserId:  client.user.Id,
+			RoomId:  client.hub.id,
+		})
+		if err != nil {
+			close(client.outbound)
+			client.conn.Close()
+			return
+		}
+		message.User = client.user
+		client.hub.inbound <- MessageWithClientId{
+			message:  message,
+			clientId: client.id,
+		}
+	}
+}

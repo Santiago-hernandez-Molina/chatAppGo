@@ -5,7 +5,6 @@ import (
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/middlewares"
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +14,6 @@ type Server struct {
 	roomHandler          ports.RoomHandler
 	userHandler          ports.UserHandler
 	messageHandler       ports.MessageHandler
-	hubManager           *websockets.HubManager
 	roomAccessMiddleware *middlewares.RoomAccess
 }
 
@@ -25,7 +23,6 @@ func NewServer(
 	roomAccessMiddleware *middlewares.RoomAccess,
 	userHandler ports.UserHandler,
 	messageHandler ports.MessageHandler,
-	hubManager *websockets.HubManager,
 ) *Server {
 	return &Server{
 		authMiddleware:       authMiddleware,
@@ -33,12 +30,10 @@ func NewServer(
 		userHandler:          userHandler,
 		messageHandler:       messageHandler,
 		roomAccessMiddleware: roomAccessMiddleware,
-		hubManager:           hubManager,
 	}
 }
 
 func (server *Server) Start() {
-	gin.SetMode(gin.ReleaseMode)
 	app := gin.Default()
 	server.globalMiddlewares(app)
 
@@ -101,7 +96,7 @@ func (server *Server) roomRoutes(app *gin.RouterGroup) {
 	)
 	roomRoutes.GET("/find", server.roomHandler.GetRoomsByUserId)
 	roomRoutes.POST("/new", server.roomHandler.NewRoom)
-	accessUserRoom.GET("/ws/:roomid", server.hubManager.HandleHubs)
+	accessUserRoom.GET("/ws/:roomid", server.roomHandler.ConnectToRoom)
 	accessUserRoom.GET("/show/:roomid", server.roomHandler.GetRoomById)
 	adminRoutes.POST("/:roomid/add-user", server.roomHandler.AddUserToRoom)
 }

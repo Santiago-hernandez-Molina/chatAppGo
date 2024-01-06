@@ -21,17 +21,16 @@ func main() {
 	if os.Getenv("APP_ENV") != "prod" {
 		err := godotenv.Load(".env")
 		if err != nil {
-			log.Fatal("ENV")
+			log.Fatal("ENV ERROR")
 		}
 	}
 	SECRET := os.Getenv("SECRET")
-	USERDB := os.Getenv("USER_DB")
-	PASSWORDDB := os.Getenv("PASSWORD_DB")
+	MONGO_URI := os.Getenv("MONGO_URI")
 	ctx := context.Background()
 
 	// repos
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	URI := fmt.Sprintf("mongodb+srv://%v:%v@chatapp.nsdqqou.mongodb.net/?retryWrites=true&w=majority", USERDB, PASSWORDDB)
+	URI := fmt.Sprintf("%s", MONGO_URI)
 	opts := options.Client().ApplyURI(URI).SetServerAPIOptions(serverAPI)
 
 	mongoRepo, err := mongo.NewRepo(opts)
@@ -63,20 +62,18 @@ func main() {
 	)
 
 	// handlers
+    roomManager := websockets.NewRoomManager()
 	roomHandlers := handlers.NewRoomHandler(
 		sessionManager,
 		roomService,
+        roomManager,
+        messageService,
 	)
 	userHandlers := handlers.NewUserHandler(
 		sessionManager,
 		userService,
 	)
 	messageHandler := handlers.NewMessageHandler(
-		messageService,
-	)
-	hubManager := websockets.NewHubManager(
-		sessionManager,
-		roomService,
 		messageService,
 	)
 
@@ -87,7 +84,6 @@ func main() {
 		roomAccess,
 		userHandlers,
 		messageHandler,
-		hubManager,
 	)
 	router.Start()
 }

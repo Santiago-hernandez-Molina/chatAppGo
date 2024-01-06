@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
@@ -38,13 +39,13 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		})
 		return
 	}
-	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetSameSite(http.SameSiteStrictMode)
 	c.SetCookie(
 		"Authorization",
 		userWithToken.Token,
 		14_400,
 		"/",
-        "",
+		os.Getenv("DOMAIN"),
 		true,
 		true,
 	)

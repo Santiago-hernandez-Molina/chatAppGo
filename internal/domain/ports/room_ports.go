@@ -26,4 +26,5 @@ type RoomHandler interface {
     GetRoomById(ctx *gin.Context)
 	NewRoom(ctx *gin.Context)
 	AddUserToRoom(ctx *gin.Context)
+    ConnectToRoom(ctx *gin.Context)
 }
