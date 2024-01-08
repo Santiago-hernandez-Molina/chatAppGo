@@ -70,7 +70,7 @@ func (handler *UserHandler) Login(c *gin.Context) {
 		14_400,
 		"/",
 		"",
-		false,
+		true,
 		true,
 	)
 	c.JSON(http.StatusAccepted, &dtos.LoginResponse{

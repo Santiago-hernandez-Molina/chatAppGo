@@ -21,6 +21,7 @@ func NewAuthMiddleware(sessionManager ports.SessionManager) *AuthMiddleware {
 var NO_AUTH_NEEDED = []string{
 	"/login",
 	"/register",
+    "/activate",
 }
 
 func (middleware *AuthMiddleware) isPublicRoute(route string) bool {
