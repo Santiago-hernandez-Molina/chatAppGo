@@ -15,6 +15,7 @@ RUN go build -o main cmd/main.go
 
 # Exponer el puerto en el que la aplicación se ejecutará
 EXPOSE 8080
+EXPOSE 587
 
 # Establecer las variables de entorno para la conexión a MongoDB
 
