@@ -11,7 +11,7 @@ import (
 
 type RoomAccess struct {
 	sessionManager ports.SessionManager
-	roomService    ports.RoomService
+	roomUseCase    ports.RoomUseCase
 }
 
 func (middleware *RoomAccess) VerifyRoomAccess(roles []string) gin.HandlerFunc {
@@ -29,7 +29,7 @@ func (middleware *RoomAccess) VerifyRoomAccess(roles []string) gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		userRoom, err := middleware.roomService.GetUserRoom(
+		userRoom, err := middleware.roomUseCase.GetUserRoom(
 			userId,
 			roomId,
 		)
@@ -54,9 +54,9 @@ func (middleware *RoomAccess) VerifyRoomAccess(roles []string) gin.HandlerFunc {
 	}
 }
 
-func NewRoomAccess(sessionManager ports.SessionManager, roomService ports.RoomService) *RoomAccess {
+func NewRoomAccess(sessionManager ports.SessionManager, roomService ports.RoomUseCase) *RoomAccess {
 	return &RoomAccess{
 		sessionManager: sessionManager,
-		roomService:    roomService,
+		roomUseCase:    roomService,
 	}
 }

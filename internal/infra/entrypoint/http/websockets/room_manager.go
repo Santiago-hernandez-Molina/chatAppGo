@@ -35,7 +35,7 @@ func (manager *RoomManager) AddClient(
 	user *models.User,
 	roomId int,
 	hub *Hub,
-	messageService ports.MessageService,
+	messageUseCase ports.MessageUseCase,
 ) (*Client, error) {
 	manager.mutex.Lock()
 	defer manager.mutex.Unlock()
@@ -43,7 +43,7 @@ func (manager *RoomManager) AddClient(
 	if err != nil {
 		return nil, err
 	}
-	client := NewClient(conn, hub, user, messageService)
+	client := NewClient(conn, hub, user, messageUseCase)
 	manager.Hubs[roomId].newClient <- client
 	return client, nil
 }

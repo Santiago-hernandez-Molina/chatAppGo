@@ -10,13 +10,38 @@ import (
 )
 
 type UserHandler struct {
-	UserService    ports.UserService
+	userUseCase    ports.UserUseCase
+	userTask       ports.UserTask
 	sessionManager ports.SessionManager
 }
 
 var _ ports.UserHandler = (*UserHandler)(nil)
 
-func (uh *UserHandler) Login(c *gin.Context) {
+func (handler *UserHandler) ActivateAccount(c *gin.Context) {
+	var activationRequest dtos.ActivationRequest
+	err := c.BindJSON(&activationRequest)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid request",
+		})
+		return
+	}
+	err = handler.userUseCase.ActivateAccount(
+		activationRequest.Code,
+		activationRequest.Email,
+	)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Cannot active the account, try register again",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Account activated successfully",
+	})
+}
+
+func (handler *UserHandler) Login(c *gin.Context) {
 	request := dtos.LoginRequest{}
 	err := c.BindJSON(&request)
 	if err != nil {
@@ -25,7 +50,7 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		})
 		return
 	}
-	userWithToken, err := uh.UserService.Login(
+	userWithToken, err := handler.userUseCase.Login(
 		&models.User{
 			Email:    request.Email,
 			Password: request.Password,
@@ -45,7 +70,7 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		14_400,
 		"/",
 		"",
-		true,
+		false,
 		true,
 	)
 	c.JSON(http.StatusAccepted, &dtos.LoginResponse{
@@ -55,7 +80,7 @@ func (uh *UserHandler) Login(c *gin.Context) {
 	})
 }
 
-func (uh *UserHandler) Register(c *gin.Context) {
+func (handler *UserHandler) Register(c *gin.Context) {
 	request := dtos.RegisterRequest{}
 	err := c.BindJSON(&request)
 	if err != nil {
@@ -63,7 +88,7 @@ func (uh *UserHandler) Register(c *gin.Context) {
 			"message": "Error reading data",
 		})
 	}
-	err = uh.UserService.Register(&models.User{
+	err = handler.userUseCase.Register(&models.User{
 		Username: request.Username,
 		Email:    request.Email,
 		Password: request.Password,
@@ -75,13 +100,18 @@ func (uh *UserHandler) Register(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "User Created Succesfully",
+		"message": "Check your email",
 	})
 }
 
-func NewUserHandler(sessionManager ports.SessionManager, userService ports.UserService) *UserHandler {
+func NewUserHandler(
+	sessionManager ports.SessionManager,
+	userUseCase ports.UserUseCase,
+	userTask ports.UserTask,
+) *UserHandler {
 	return &UserHandler{
+		userTask:       userTask,
 		sessionManager: sessionManager,
-		UserService:    userService,
+		userUseCase:    userUseCase,
 	}
 }

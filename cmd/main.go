@@ -6,13 +6,15 @@ import (
 	"log"
 	"os"
 
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/services"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/authentication"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/email"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/repository/mongo"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/tasks"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/handlers"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/middlewares"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/usecases"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -26,6 +28,9 @@ func main() {
 	}
 	SECRET := os.Getenv("SECRET")
 	MONGO_URI := os.Getenv("MONGO_URI")
+	EMAIL_USER := os.Getenv("EMAIL_HOST_USER")
+	EMAIL_PASSWORD := os.Getenv("EMAIL_HOST_PASSWORD")
+	EMAIL_HOST := os.Getenv("EMAIL_HOST")
 	ctx := context.Background()
 
 	// repos
@@ -41,43 +46,56 @@ func main() {
 	messageRepo := mongo.NewMessageRepo(mongoRepo, ctx)
 	userRepo := mongo.NewUserRepo(mongoRepo, ctx)
 
+	// Email Sender
+	emailSender := email.NewEmailSender(
+		EMAIL_USER,
+		EMAIL_PASSWORD,
+		EMAIL_HOST,
+	)
+
 	// AuthManager
 	sessionManager := authentication.NewSessionManager(SECRET)
 	passwordManager := authentication.NewPasswordManager()
 
-	// services
-	roomService := services.NewRoomService(roomRepo)
-	messageService := services.NewMessageService(messageRepo)
-	userService := services.NewUserService(
+	// Tasks
+	userTask := tasks.NewUserTasks(userRepo)
+
+	// UseCases
+	roomUseCase := usecases.NewRoomUseCase(roomRepo)
+	messageUseCase := usecases.NewMessageUseCase(messageRepo)
+	userUseCase := usecases.NewUserUseCase(
 		userRepo,
 		sessionManager,
 		passwordManager,
+		emailSender,
+		userTask,
 	)
 
-	// middlewares
+	// Middlewares
 	authMiddleware := middlewares.NewAuthMiddleware(sessionManager)
 	roomAccess := middlewares.NewRoomAccess(
 		sessionManager,
-		roomService,
+		roomUseCase,
 	)
 
-	// handlers
-    roomManager := websockets.NewRoomManager()
+	// Handlers
+	roomManager := websockets.NewRoomManager()
 	roomHandlers := handlers.NewRoomHandler(
 		sessionManager,
-		roomService,
-        roomManager,
-        messageService,
+		roomUseCase,
+		roomManager,
+		messageUseCase,
 	)
 	userHandlers := handlers.NewUserHandler(
 		sessionManager,
-		userService,
+		userUseCase,
+		userTask,
 	)
 	messageHandler := handlers.NewMessageHandler(
-		messageService,
+		messageUseCase,
 	)
 
-	// httpServer
+	// HttpServer
 	router := http.NewServer(
 		roomHandlers,
 		authMiddleware,

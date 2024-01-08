@@ -17,3 +17,7 @@ type LoginResponse struct {
     Username string `json:"username"`
 }
 
+type ActivationRequest struct{
+    Email string `json:"email"`
+    Code int `json:"code"`
+}

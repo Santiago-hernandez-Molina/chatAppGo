@@ -14,17 +14,17 @@ type Client struct {
 	outbound       chan models.MessageUser
 	hub            *Hub
 	user           *models.User
-	messageService ports.MessageService
+	messageUseCase ports.MessageUseCase
 }
 
-func NewClient(conn *websocket.Conn, hub *Hub, user *models.User, messageService ports.MessageService) *Client {
+func NewClient(conn *websocket.Conn, hub *Hub, user *models.User, messageUseCase ports.MessageUseCase) *Client {
 	return &Client{
 		id:             conn.RemoteAddr().String(),
 		conn:           conn,
 		outbound:       make(chan models.MessageUser),
 		hub:            hub,
 		user:           user,
-		messageService: messageService,
+		messageUseCase: messageUseCase,
 	}
 }
 
@@ -57,7 +57,7 @@ func (client *Client) Read(wg *sync.WaitGroup) {
 			client.conn.Close()
 			return
 		}
-		err = client.messageService.SaveMessage(&models.Message{
+		err = client.messageUseCase.SaveMessage(&models.Message{
 			Content: message.Content,
 			UserId:  client.user.Id,
 			RoomId:  client.hub.id,

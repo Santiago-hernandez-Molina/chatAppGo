@@ -10,5 +10,5 @@ type Message struct {
 type MessageUser struct {
 	Id      int    `json:"id" bson:"_id"`
 	Content string `json:"content" bson:"content"`
-	User    *User   `json:"user" bson:"user"`
+	User    *User  `json:"user" bson:"user"`
 }

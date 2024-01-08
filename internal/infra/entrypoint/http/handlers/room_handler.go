@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 	"strconv"
-	"sync"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
@@ -14,8 +13,8 @@ import (
 
 type RoomHandler struct {
 	sessionManager  ports.SessionManager
-	roomService     ports.RoomService
-	messagesService ports.MessageService
+	roomUseCase     ports.RoomUseCase
+	messagesService ports.MessageUseCase
 	roomManager     *websockets.RoomManager
 }
 
@@ -23,12 +22,12 @@ var _ ports.RoomHandler = (*RoomHandler)(nil)
 
 func NewRoomHandler(
 	sessionManager ports.SessionManager,
-	roomService ports.RoomService,
+	roomService ports.RoomUseCase,
 	roomManager *websockets.RoomManager,
-	messagesService ports.MessageService,
+	messagesService ports.MessageUseCase,
 ) *RoomHandler {
 	return &RoomHandler{
-		roomService:     roomService,
+		roomUseCase:     roomService,
 		sessionManager:  sessionManager,
 		roomManager:     roomManager,
 		messagesService: messagesService,
@@ -43,10 +42,7 @@ func (handler *RoomHandler) ConnectToRoom(ctx *gin.Context) {
 	roomId, _ := strconv.Atoi(roomParam)
 
 	hub := handler.roomManager.AddHub(roomId)
-	var wg sync.WaitGroup
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		if hub != nil {
 			hub.Run()
 			handler.roomManager.RemoveHub(roomId)
@@ -70,19 +66,14 @@ func (handler *RoomHandler) ConnectToRoom(ctx *gin.Context) {
 		})
 		return
 	}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		client.Run()
-	}()
-	wg.Wait()
+	go client.Run()
 }
 
 func (handler *RoomHandler) GetRoomById(ctx *gin.Context) {
 	roomParam := ctx.Param("roomid")
 	roomId, _ := strconv.Atoi(roomParam)
 
-	room, err := handler.roomService.GetRoomById(roomId)
+	room, err := handler.roomUseCase.GetRoomById(roomId)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"message": "Room not found",
@@ -104,7 +95,7 @@ func (handler *RoomHandler) AddUserToRoom(ctx *gin.Context) {
 		})
 		return
 	}
-	err = handler.roomService.AddUserToRoom(userRoom.UserId, roomId)
+	err = handler.roomUseCase.AddUserToRoom(userRoom.UserId, roomId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "Error adding new user check your data",
@@ -121,7 +112,7 @@ func (handler *RoomHandler) GetRoomsByUserId(ctx *gin.Context) {
 	claims, _ := handler.sessionManager.GetCredentials(cookieAuth.Value)
 	userId := claims.UserId
 
-	rooms, err := handler.roomService.GetRoomsByUserId(userId)
+	rooms, err := handler.roomUseCase.GetRoomsByUserId(userId)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"message": "Cannot found the rooms",
@@ -142,7 +133,7 @@ func (handler *RoomHandler) NewRoom(ctx *gin.Context) {
 		http.Error(ctx.Writer, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = handler.roomService.NewRoom(
+	err = handler.roomUseCase.NewRoom(
 		models.Room{Name: request.Name},
 		userId,
 	)

@@ -1,6 +1,8 @@
 package authentication
 
 import (
+	"crypto/rand"
+	"math/big"
 	"time"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
@@ -10,6 +12,16 @@ import (
 
 type SessionManager struct {
 	secret string
+}
+
+// GenerateAuthCode implements ports.SessionManager.
+func (manager *SessionManager) GenerateAuthCode() (int, error) {
+	result, err := rand.Int(rand.Reader, big.NewInt(9000))
+	if err != nil {
+		return 0, err
+	}
+	code := 1000 + int(result.Int64())
+	return code, nil
 }
 
 func (manager *SessionManager) SignToken(user *models.User) (string, error) {

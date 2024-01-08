@@ -9,7 +9,7 @@ import (
 )
 
 type MessageHandler struct {
-	messageService ports.MessageService
+	messageUseCase ports.MessageUseCase
 }
 
 func (mh *MessageHandler) GetMessagesByRoomId(ctx *gin.Context) {
@@ -22,7 +22,7 @@ func (mh *MessageHandler) GetMessagesByRoomId(ctx *gin.Context) {
 		return
 	}
 
-	messages, err := mh.messageService.GetMessagesByRoomId(roomid)
+	messages, err := mh.messageUseCase.GetMessagesByRoomId(roomid)
 	if err != nil {
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -37,8 +37,8 @@ func (mh *MessageHandler) GetMessagesByRoomId(ctx *gin.Context) {
 
 var _ ports.MessageHandler = (*MessageHandler)(nil)
 
-func NewMessageHandler(messageService ports.MessageService) *MessageHandler {
+func NewMessageHandler(messageService ports.MessageUseCase) *MessageHandler {
     return &MessageHandler{
-        messageService: messageService,
+        messageUseCase: messageService,
     }
 }

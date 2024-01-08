@@ -74,8 +74,9 @@ func (server *Server) globalMiddlewares(app *gin.Engine) {
 
 // AUTH ROUTES
 func (server *Server) authRoutes(app *gin.Engine) {
-	app.POST("/register", server.userHandler.Register)
+	app.POST("register", server.userHandler.Register)
 	app.POST("login", server.userHandler.Login)
+    app.POST("activate", server.userHandler.ActivateAccount)
 }
 
 // Room Routes

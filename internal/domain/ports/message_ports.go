@@ -10,7 +10,7 @@ type MessageRepo interface {
 	SaveMessage(message *models.Message) error
 }
 
-type MessageService interface {
+type MessageUseCase interface {
 	GetMessagesByRoomId(roomId int) ([]models.MessageUser, error)
 	SaveMessage(message *models.Message) error
 }
