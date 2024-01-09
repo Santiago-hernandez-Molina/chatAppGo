@@ -10,21 +10,12 @@ type RoomUseCase struct {
 }
 
 func (useCase *RoomUseCase) AddUserToRoom(userId int, roomId int) error {
-    err := useCase.repo.AddUserToRoom(userId, roomId)
-    if err != nil {
-        return err
-    }
-
-    return nil
-}
-
-
-var _ ports.RoomUseCase = (*RoomUseCase)(nil)
-
-func NewRoomUseCase(repo ports.RoomRepo) *RoomUseCase {
-	return &RoomUseCase{
-		repo: repo,
+	err := useCase.repo.AddUserToRoom(userId, roomId)
+	if err != nil {
+		return err
 	}
+
+	return nil
 }
 
 func (useCase *RoomUseCase) NewRoom(room models.Room, userId int) error {
@@ -35,7 +26,10 @@ func (useCase *RoomUseCase) NewRoom(room models.Room, userId int) error {
 	return nil
 }
 
-func (useCase *RoomUseCase) GetRoomById(roomId int) (*models.Room, error) {
+func (useCase *RoomUseCase) GetRoomById(roomId int) (
+	*models.Room,
+	error,
+) {
 	room, err := useCase.repo.GetRoomById(roomId)
 	if err != nil {
 		return nil, err
@@ -43,7 +37,10 @@ func (useCase *RoomUseCase) GetRoomById(roomId int) (*models.Room, error) {
 	return room, nil
 }
 
-func (useCase *RoomUseCase) GetRoomsByUserId(userId int) ([]models.Room, error) {
+func (useCase *RoomUseCase) GetRoomsByUserId(userId int) (
+	[]models.Room,
+	error,
+) {
 	room, err := useCase.repo.GetRoomsByUserId(userId)
 	if err != nil {
 		return nil, err
@@ -51,10 +48,24 @@ func (useCase *RoomUseCase) GetRoomsByUserId(userId int) ([]models.Room, error) 
 	return room, nil
 }
 
-func (useCase *RoomUseCase) GetUserRoom(userId int, roomId int) (*models.UserRoom, error) {
-    userRoom, err := useCase.repo.GetUserRoom(userId, roomId)
-    if err != nil {
-        return nil, err
-    }
-    return userRoom, nil
+func (useCase *RoomUseCase) GetUserRoom(userId int, roomId int) (
+	*models.UserRoom,
+	error,
+) {
+	userRoom, err := useCase.repo.GetUserRoom(
+		userId,
+		roomId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return userRoom, nil
+}
+
+var _ ports.RoomUseCase = (*RoomUseCase)(nil)
+
+func NewRoomUseCase(repo ports.RoomRepo) *RoomUseCase {
+	return &RoomUseCase{
+		repo: repo,
+	}
 }

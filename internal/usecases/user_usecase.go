@@ -70,13 +70,13 @@ func (useCase *UserUseCase) Register(user *models.User) error {
 	if err != nil {
 		return err
 	}
-    code, err := useCase.sessionManager.GenerateAuthCode()
+	code, err := useCase.sessionManager.GenerateAuthCode()
 	if err != nil {
 		return err
 	}
 
 	user.Password = encryptedPassowrd
-    user.Code = code
+	user.Code = code
 
 	err = useCase.repo.Register(user)
 	if err != nil {
@@ -84,7 +84,7 @@ func (useCase *UserUseCase) Register(user *models.User) error {
 	}
 	err = useCase.emailSender.SendRegisterConfirm(user, code)
 	if err != nil {
-        //To do: Delete User
+		// To do: Delete User
 		return err
 	}
 	go useCase.userTask.DeleteAccountTask(user.Email)

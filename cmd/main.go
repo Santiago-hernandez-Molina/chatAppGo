@@ -26,11 +26,14 @@ func main() {
 			log.Fatal("ENV ERROR")
 		}
 	}
+
 	SECRET := os.Getenv("SECRET")
-	MONGO_URI := os.Getenv("MONGO_URI")
+
+	EMAIL_HOST := os.Getenv("EMAIL_HOST")
 	EMAIL_USER := os.Getenv("EMAIL_HOST_USER")
 	EMAIL_PASSWORD := os.Getenv("EMAIL_HOST_PASSWORD")
-	EMAIL_HOST := os.Getenv("EMAIL_HOST")
+
+	MONGO_URI := os.Getenv("MONGO_URI")
 	ctx := context.Background()
 
 	// repos

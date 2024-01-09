@@ -7,4 +7,4 @@ services:
       dockerfile: Dockerfile
       context: .
     volumes:
-      - .:/opt/app/api
+      - .:/opt/app/chatApp

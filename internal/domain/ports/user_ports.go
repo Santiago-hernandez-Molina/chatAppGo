@@ -10,7 +10,7 @@ type UserRepo interface {
 	Register(user *models.User) error
 	DeleteUser(userId int) error
 	DeleteInactiveUser(email string) error
-    ActivateAccount(code int, email string) error
+	ActivateAccount(code int, email string) error
 }
 
 type UserUseCase interface {
@@ -18,7 +18,7 @@ type UserUseCase interface {
 	Register(user *models.User) error
 	DeleteUser(userId int) error
 	GetCredentials(token string) (*models.User, error)
-    ActivateAccount(code int, email string) error
+	ActivateAccount(code int, email string) error
 }
 
 type UserTask interface {
@@ -28,7 +28,7 @@ type UserTask interface {
 type UserHandler interface {
 	Login(c *gin.Context)
 	Register(c *gin.Context)
-    ActivateAccount(c *gin.Context)
+	ActivateAccount(c *gin.Context)
 }
 
 // Session Related
