@@ -57,6 +57,7 @@ func (client *Client) Read(wg *sync.WaitGroup) {
 			client.conn.Close()
 			return
 		}
+		message.User = client.user
 		err = client.messageUseCase.SaveMessage(&models.Message{
 			Content: message.Content,
 			UserId:  client.user.Id,
