@@ -49,15 +49,14 @@ func (client *Client) Write(wg *sync.WaitGroup) {
 
 func (client *Client) Read(wg *sync.WaitGroup) {
 	defer wg.Done()
-	message := models.MessageUser{}
 	for {
+		message := models.MessageUser{}
 		err := client.conn.ReadJSON(&message)
 		if err != nil {
 			close(client.outbound)
 			client.conn.Close()
 			return
 		}
-		message.User = client.user
 		err = client.messageUseCase.SaveMessage(&models.Message{
 			Content: message.Content,
 			UserId:  client.user.Id,
