@@ -7,6 +7,7 @@ import (
 
 type UserRepo interface {
 	GetUserByEmail(user *models.User) (*models.User, error)
+	GetUserById(userId int) (*models.User, error)
 	Register(user *models.User) error
 	DeleteUser(userId int) error
 	DeleteInactiveUser(email string) error

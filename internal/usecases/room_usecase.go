@@ -10,6 +10,7 @@ import (
 
 type RoomUseCase struct {
 	repo ports.RoomRepo
+	userRepo ports.UserRepo
 }
 
 func (useCase *RoomUseCase) AddUserToRoom(userId int, roomId int) error {
@@ -19,6 +20,10 @@ func (useCase *RoomUseCase) AddUserToRoom(userId int, roomId int) error {
 	}
 	if !errors.Is(err, &exceptions.UserNotFound{}) {
 		return &exceptions.AccesDataException{}
+	}
+	_, err = useCase.userRepo.GetUserById(userId)
+	if err != nil {
+		return err
 	}
 	err = useCase.repo.AddUserToRoom(userId, roomId)
 	if err != nil {

@@ -17,6 +17,20 @@ type UserRepo struct {
 	ctx        context.Context
 }
 
+func (repo *UserRepo) GetUserById(userId int) (*models.User, error) {
+	filter := bson.D{{Key: "_id", Value: userId}}
+	result := repo.collection.FindOne(repo.ctx, filter)
+	user := models.User{}
+	err := result.Decode(&user)
+	if err == nil {
+		return &user, nil
+	}
+	if err == mongo.ErrNoDocuments {
+		return nil, &exceptions.UserNotFound{}
+	}
+	return nil, err
+}
+
 func (repo *UserRepo) ActivateAccount(code int, email string) error {
 	filter := bson.D{
 		{Key: "email", Value: email},
