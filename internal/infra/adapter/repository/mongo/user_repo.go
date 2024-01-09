@@ -31,9 +31,9 @@ func (repo *UserRepo) ActivateAccount(code int, email string) error {
 	if err != nil {
 		return err
 	}
-    if result.MatchedCount == 0 {
-        return errors.New("Cannot found the user")
-    }
+	if result.MatchedCount == 0 {
+		return errors.New("Cannot found the user")
+	}
 
 	return nil
 }
@@ -55,8 +55,16 @@ func (repo *UserRepo) DeleteInactiveUser(email string) error {
 	return nil
 }
 
-func (*UserRepo) DeleteUser(userId int) error {
-	panic("unimplemented")
+func (repo *UserRepo) DeleteUser(userId int) error {
+	filter := bson.D{{Key: "_id", Value: userId}}
+	result, err := repo.collection.DeleteOne(repo.ctx, filter)
+	if err != nil {
+		return err
+	}
+	if result.DeletedCount == 0 {
+		return errors.New("User not found")
+	}
+	return nil
 }
 
 func (repo *UserRepo) GetUserByEmail(user *models.User) (*models.User, error) {

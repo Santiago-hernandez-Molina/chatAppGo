@@ -43,6 +43,9 @@ func (useCase *UserUseCase) Login(user *models.User) (*models.UserWithToken, err
 	if err != nil {
 		return nil, err
 	}
+	if userDB.Status == false {
+		return nil, errors.New("The account has not been actived")
+	}
 	success := useCase.passwordManager.ValidatePassword(
 		userDB.Password,
 		user.Password,
@@ -84,7 +87,11 @@ func (useCase *UserUseCase) Register(user *models.User) error {
 	}
 	err = useCase.emailSender.SendRegisterConfirm(user, code)
 	if err != nil {
-		// To do: Delete User
+		user, errUser := useCase.repo.GetUserByEmail(user)
+		if errUser != nil {
+			return err
+		}
+		useCase.repo.DeleteUser(user.Id)
 		return err
 	}
 	go useCase.userTask.DeleteAccountTask(user.Email)
