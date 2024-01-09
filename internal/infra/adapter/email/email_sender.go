@@ -21,8 +21,8 @@ func (sender *EmailSender) SendRegisterConfirm(user *models.User, code int) erro
 		"ChatApp",
 		sender.emailServer,
 		"ChatApp Register Code",
-        "This is your activation code, don't share with anyone!! Expires in 10 minutes: ",
-        code,
+		"This is your activation code, don't share with anyone!! Expires in 10 minutes: ",
+		code,
 	)
 	msg := []byte(body)
 
