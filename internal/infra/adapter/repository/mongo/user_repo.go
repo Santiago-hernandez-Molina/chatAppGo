@@ -3,7 +3,6 @@ package mongo
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
@@ -43,15 +42,13 @@ func (repo *UserRepo) DeleteInactiveUser(email string) error {
 		{Key: "email", Value: email},
 		{Key: "status", Value: false},
 	}
-	result, err := repo.collection.DeleteOne(repo.ctx, filter)
+	_, err := repo.collection.DeleteOne(repo.ctx, filter)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil
 		}
 		return err
 	}
-	log.Println(result)
-	log.Println(result.DeletedCount)
 	return nil
 }
 

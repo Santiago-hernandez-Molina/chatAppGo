@@ -2,7 +2,9 @@ package mongo
 
 import (
 	"context"
+	"errors"
 
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,11 +31,15 @@ func (repo *RoomRepo) AddUserToRoom(userId int, roomId int) error {
 			},
 		},
 	}}
+
 	_, err := repo.collection.UpdateOne(repo.ctx, filter, update)
-	if err != nil {
-		return err
+	if err == nil {
+		return nil
 	}
-	return nil
+	if err == mongo.ErrNoDocuments {
+		return errors.New("Room Not Found")
+	}
+	return &exceptions.AccesDataException{}
 }
 
 var _ ports.RoomRepo = (*RoomRepo)(nil)
@@ -98,6 +104,9 @@ func (repo *RoomRepo) GetUserRoom(userId int, roomId int) (*models.UserRoom, err
 		options.FindOne().SetProjection(projection),
 	).Decode(&room)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, &exceptions.UserNotFound{}
+		}
 		return nil, err
 	}
 

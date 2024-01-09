@@ -1,6 +1,9 @@
 package usecases
 
 import (
+	"errors"
+
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 )
@@ -10,7 +13,14 @@ type RoomUseCase struct {
 }
 
 func (useCase *RoomUseCase) AddUserToRoom(userId int, roomId int) error {
-	err := useCase.repo.AddUserToRoom(userId, roomId)
+	_, err := useCase.repo.GetUserRoom(userId, roomId)
+	if err == nil {
+		return &exceptions.DuplicatedUser{}
+	}
+	if !errors.Is(err, &exceptions.UserNotFound{}) {
+		return &exceptions.AccesDataException{}
+	}
+	err = useCase.repo.AddUserToRoom(userId, roomId)
 	if err != nil {
 		return err
 	}

@@ -41,13 +41,11 @@ func (middleware *RoomAccess) VerifyRoomAccess(roles []string) gin.HandlerFunc {
 			return
 		}
 		if !slices.Contains(roles, userRoom.Role) {
-			if err != nil {
-				ctx.JSON(http.StatusForbidden, gin.H{
-					"message": "You are not allowed to this room",
-				})
-				ctx.Abort()
-				return
-			}
+			ctx.JSON(http.StatusForbidden, gin.H{
+				"message": "You are not allowed to this room",
+			})
+			ctx.Abort()
+			return
 		}
 
 		ctx.Next()

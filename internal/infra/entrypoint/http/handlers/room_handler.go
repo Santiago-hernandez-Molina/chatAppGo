@@ -98,7 +98,7 @@ func (handler *RoomHandler) AddUserToRoom(ctx *gin.Context) {
 	err = handler.roomUseCase.AddUserToRoom(userRoom.UserId, roomId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "Error adding new user check your data",
+			"message": err.Error(),
 		})
 		return
 	}
