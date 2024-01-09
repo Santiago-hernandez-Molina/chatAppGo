@@ -16,5 +16,5 @@ type MessageUseCase interface {
 }
 
 type MessageHandler interface {
-    GetMessagesByRoomId(ctx *gin.Context)
+	GetMessagesByRoomId(ctx *gin.Context)
 }
