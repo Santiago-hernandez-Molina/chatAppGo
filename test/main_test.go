@@ -1,8 +1,11 @@
 package test
 
 import (
+	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -38,12 +41,48 @@ func init() {
 	App = config.ConfigApp()
 }
 
-func TestApp(t *testing.T) {
+func TestMain(m *testing.M) {
 	data.InitDB(MONGO_URI, DATABASE_NAME)
-	log.Println("test")
-	t.Run("Test Login Endpoint", TLogin)
+	exitCode := m.Run()
+	data.CleanDB()
+	os.Exit(exitCode)
+}
 
-	defer t.Cleanup(func() {
-		data.CleanDB()
-	})
+func MakeRequest(
+	method,
+	url string,
+	body interface{},
+	isAuthenticatedRequest bool,
+	user map[string]string,
+) *httptest.ResponseRecorder {
+	requestBody, _ := json.Marshal(body)
+	request, _ := http.NewRequest(method, url, bytes.NewBuffer(requestBody))
+	if isAuthenticatedRequest {
+		request.AddCookie(authCookie(user))
+	}
+	writer := httptest.NewRecorder()
+	App.ServeHTTP(writer, request)
+	return writer
+}
+
+var (
+	LoginUser = map[string]string{
+		"email":    "juan@gmail.com",
+		"password": "12345678",
+	}
+	LoginUser2 = map[string]string{
+		"email":    "pedro@gmail.com",
+		"password": "12345678",
+	}
+)
+
+func authCookie(userAuth map[string]string) *http.Cookie {
+	writer := MakeRequest("POST", "/login", userAuth, false, LoginUser)
+	cookies := writer.Result().Cookies()
+	for _, cookie := range cookies {
+		if cookie.Name == "Authorization" {
+			return cookie
+		}
+	}
+	return nil
 }

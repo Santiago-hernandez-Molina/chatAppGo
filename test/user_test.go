@@ -1,10 +1,6 @@
 package test
 
 import (
-	"bytes"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,17 +38,9 @@ var LoginTestCase []LoginTest = []LoginTest{
 	},
 }
 
-func TLogin(t *testing.T) {
+func TestLogin(t *testing.T) {
 	for _, user := range LoginTestCase {
-		w := httptest.NewRecorder()
-		request, _ := json.Marshal(user.Args)
-		req, _ := http.NewRequest(
-			"POST",
-			"/login",
-			bytes.NewBuffer(request),
-		)
-		App.ServeHTTP(w, req)
+		w := MakeRequest("POST", "/login", user.Args, false, LoginUser)
 		assert.Equal(t, user.Status, w.Code)
 	}
 }
-
