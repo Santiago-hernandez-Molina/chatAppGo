@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/repository/mongo/data"
@@ -29,18 +30,25 @@ func (repo *MongoRepo) FindNextId(ctx context.Context, counterName string) int {
 	}}
 	counter := data.Counter{}
 	result := counters.FindOneAndUpdate(ctx, filter, update)
-    result.Decode(&counter)
+	result.Decode(&counter)
 	return counter.Seq
 }
 
-func NewRepo(opt *options.ClientOptions) (*MongoRepo, error) {
+func NewRepo(MONGO_URI string, databaseName string) (*MongoRepo, error) {
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	URI := fmt.Sprintf("%s", MONGO_URI)
+	opts := options.Client().ApplyURI(
+		URI,
+	).SetServerAPIOptions(
+		serverAPI,
+	)
 	ctx, cancelF := context.WithTimeout(
 		context.Background(),
 		MongoTimeOut*time.Second,
 	)
 	defer cancelF()
 
-	client, err := mongo.Connect(ctx, opt)
+	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +58,7 @@ func NewRepo(opt *options.ClientOptions) (*MongoRepo, error) {
 		return nil, err
 	}
 
-	database := client.Database("chatApp")
+	database := client.Database(databaseName)
 
 	return &MongoRepo{
 		client:   client,

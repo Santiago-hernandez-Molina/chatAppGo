@@ -56,21 +56,10 @@ func (repo *RoomRepo) GetRoomById(roomId int) (*models.Room, error) {
 	return &room, nil
 }
 
-func (repo *RoomRepo) NewRoom(room models.Room, userId int) error {
+func (repo *RoomRepo) NewRoom(room *models.Room) error {
 	room.Id = repo.mongoRepo.FindNextId(repo.ctx, "roomid")
-	roomDTO := models.Room{
-		Id:   room.Id,
-		Name: room.Name,
-		Users: []models.UserRoom{
-			{UserId: userId, RoomId: room.Id, Role: "admin"},
-		},
-	}
-	_, err := repo.collection.InsertOne(repo.ctx, roomDTO)
-	if err != nil {
-		return err
-	} else {
-		return nil
-	}
+	_, err := repo.collection.InsertOne(repo.ctx, room)
+	return err
 }
 
 func (repo *RoomRepo) GetRoomsByUserId(userId int) ([]models.Room, error) {

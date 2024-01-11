@@ -45,8 +45,8 @@ func (handler *UserHandler) Login(c *gin.Context) {
 	request := dtos.LoginRequest{}
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Something went wrong reading json",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Json incorrect data provided",
 		})
 		return
 	}
@@ -57,7 +57,7 @@ func (handler *UserHandler) Login(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Not found user with the given credentials",
 			"err":     err.Error(),
 		})
@@ -73,7 +73,7 @@ func (handler *UserHandler) Login(c *gin.Context) {
 		true,
 		true,
 	)
-	c.JSON(http.StatusAccepted, &dtos.LoginResponse{
+	c.JSON(http.StatusOK, &dtos.LoginResponse{
 		Id:       userWithToken.User.Id,
 		Email:    userWithToken.User.Email,
 		Username: userWithToken.User.Username,

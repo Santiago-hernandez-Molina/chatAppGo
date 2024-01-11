@@ -9,7 +9,7 @@ import (
 )
 
 type RoomUseCase struct {
-	repo ports.RoomRepo
+	repo     ports.RoomRepo
 	userRepo ports.UserRepo
 }
 
@@ -34,20 +34,40 @@ func (useCase *RoomUseCase) AddUserToRoom(userId int, roomId int) error {
 }
 
 func (useCase *RoomUseCase) NewRoom(room models.Room, userId int) error {
-	err := useCase.repo.NewRoom(room, userId)
+	room.Type = models.RoomType(models.Group)
+	room.Users = []models.UserRoom{
+		{UserId: userId, RoomId: room.Id, Role: "admin"},
+	}
+	err := useCase.repo.NewRoom(&room)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (useCase *RoomUseCase) GetRoomById(roomId int) (
+func (useCase *RoomUseCase) GetRoomById(roomId int, userId int) (
 	*models.Room,
 	error,
 ) {
 	room, err := useCase.repo.GetRoomById(roomId)
 	if err != nil {
 		return nil, err
+	}
+	if room.Type == models.RoomType(models.Group) {
+		return room, nil
+	}
+	if room.Users[0].UserId == userId {
+		user2, err := useCase.userRepo.GetUserById(room.Users[1].UserId)
+		if err != nil {
+			return nil, &exceptions.UserNotFound{}
+		}
+		room.Name = user2.Username
+	} else {
+		user2, err := useCase.userRepo.GetUserById(room.Users[0].UserId)
+		if err != nil {
+			return nil, &exceptions.UserNotFound{}
+		}
+		room.Name = user2.Username
 	}
 	return room, nil
 }
@@ -56,11 +76,31 @@ func (useCase *RoomUseCase) GetRoomsByUserId(userId int) (
 	[]models.Room,
 	error,
 ) {
-	room, err := useCase.repo.GetRoomsByUserId(userId)
+	rooms, err := useCase.repo.GetRoomsByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
-	return room, nil
+	for i, room := range rooms {
+		if room.Type == models.RoomType(models.Group) {
+			continue
+		}
+		if room.Users[0].UserId == userId {
+			user2, err := useCase.userRepo.GetUserById(room.Users[1].UserId)
+			if err != nil {
+				rooms[i].Name = "Not Found"
+				continue
+			}
+			rooms[i].Name = user2.Username
+		} else {
+			user2, err := useCase.userRepo.GetUserById(room.Users[0].UserId)
+			if err != nil {
+				rooms[i].Name = "Not Found"
+				continue
+			}
+			rooms[i].Name = user2.Username
+		}
+	}
+	return rooms, nil
 }
 
 func (useCase *RoomUseCase) GetUserRoom(userId int, roomId int) (
@@ -79,8 +119,9 @@ func (useCase *RoomUseCase) GetUserRoom(userId int, roomId int) (
 
 var _ ports.RoomUseCase = (*RoomUseCase)(nil)
 
-func NewRoomUseCase(repo ports.RoomRepo) *RoomUseCase {
+func NewRoomUseCase(repo ports.RoomRepo, userRepo ports.UserRepo) *RoomUseCase {
 	return &RoomUseCase{
-		repo: repo,
+		repo:     repo,
+		userRepo: userRepo,
 	}
 }

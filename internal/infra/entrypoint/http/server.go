@@ -1,6 +1,7 @@
 package http
 
 import (
+	"os"
 	"slices"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
@@ -10,11 +11,12 @@ import (
 )
 
 type Server struct {
-	authMiddleware       *middlewares.AuthMiddleware
-	roomHandler          ports.RoomHandler
-	userHandler          ports.UserHandler
-	messageHandler       ports.MessageHandler
-	roomAccessMiddleware *middlewares.RoomAccess
+	roomAccessMiddleware  *middlewares.RoomAccess
+	authMiddleware        *middlewares.AuthMiddleware
+	roomHandler           ports.RoomHandler
+	userHandler           ports.UserHandler
+	messageHandler        ports.MessageHandler
+	contactRequestHandler ports.ContactRequestHandler
 }
 
 func NewServer(
@@ -23,17 +25,20 @@ func NewServer(
 	roomAccessMiddleware *middlewares.RoomAccess,
 	userHandler ports.UserHandler,
 	messageHandler ports.MessageHandler,
+	contactRequestHandler ports.ContactRequestHandler,
 ) *Server {
 	return &Server{
-		authMiddleware:       authMiddleware,
-		roomHandler:          roomH,
-		userHandler:          userHandler,
-		messageHandler:       messageHandler,
-		roomAccessMiddleware: roomAccessMiddleware,
+		authMiddleware:        authMiddleware,
+		roomHandler:           roomH,
+		userHandler:           userHandler,
+		messageHandler:        messageHandler,
+		roomAccessMiddleware:  roomAccessMiddleware,
+		contactRequestHandler: contactRequestHandler,
 	}
 }
 
-func (server *Server) Start() {
+func (server *Server) SetupServer() *gin.Engine {
+	gin.SetMode(os.Getenv("GIN_MODE"))
 	app := gin.Default()
 	server.globalMiddlewares(app)
 
@@ -43,8 +48,9 @@ func (server *Server) Start() {
 	v1 := app.Group("/v1")
 	server.roomRoutes(v1)
 	server.messagesRoutes(v1)
-
-	app.Run(":8080")
+	server.contactRequestRoutes(v1)
+	
+	return app
 }
 
 func (server *Server) globalMiddlewares(app *gin.Engine) {
@@ -76,7 +82,15 @@ func (server *Server) globalMiddlewares(app *gin.Engine) {
 func (server *Server) authRoutes(app *gin.Engine) {
 	app.POST("register", server.userHandler.Register)
 	app.POST("login", server.userHandler.Login)
-    app.POST("activate", server.userHandler.ActivateAccount)
+	app.POST("activate", server.userHandler.ActivateAccount)
+}
+
+// ContactRequestHandler Routes
+
+func (server *Server) contactRequestRoutes(app *gin.RouterGroup) {
+	contactRoutes := app.Group("/contact/")
+	contactRoutes.POST("/new", server.contactRequestHandler.SendRequest)
+	contactRoutes.POST("/accept/:requestid", server.contactRequestHandler.AcceptRequest)
 }
 
 // Room Routes

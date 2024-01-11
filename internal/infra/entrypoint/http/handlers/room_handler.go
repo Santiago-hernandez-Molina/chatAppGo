@@ -7,7 +7,7 @@ import (
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/dtos"
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets/chats"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +15,7 @@ type RoomHandler struct {
 	sessionManager  ports.SessionManager
 	roomUseCase     ports.RoomUseCase
 	messagesService ports.MessageUseCase
-	roomManager     *websockets.RoomManager
+	roomManager     *chats.RoomManager
 }
 
 var _ ports.RoomHandler = (*RoomHandler)(nil)
@@ -23,7 +23,7 @@ var _ ports.RoomHandler = (*RoomHandler)(nil)
 func NewRoomHandler(
 	sessionManager ports.SessionManager,
 	roomService ports.RoomUseCase,
-	roomManager *websockets.RoomManager,
+	roomManager *chats.RoomManager,
 	messagesService ports.MessageUseCase,
 ) *RoomHandler {
 	return &RoomHandler{
@@ -35,10 +35,10 @@ func NewRoomHandler(
 }
 
 func (handler *RoomHandler) ConnectToRoom(ctx *gin.Context) {
-	cookieAuth, _ := ctx.Cookie("Authorization")
+	authCookie, _ := ctx.Cookie("Authorization")
 	roomParam := ctx.Param("roomid")
 
-	claims, _ := handler.sessionManager.GetCredentials(cookieAuth)
+	claims, _ := handler.sessionManager.GetCredentials(authCookie)
 	roomId, _ := strconv.Atoi(roomParam)
 
 	hub := handler.roomManager.AddHub(roomId)
@@ -72,8 +72,10 @@ func (handler *RoomHandler) ConnectToRoom(ctx *gin.Context) {
 func (handler *RoomHandler) GetRoomById(ctx *gin.Context) {
 	roomParam := ctx.Param("roomid")
 	roomId, _ := strconv.Atoi(roomParam)
+	authCookie, _ := ctx.Request.Cookie("Authorization")
+	claims, _ := handler.sessionManager.GetCredentials(authCookie.Value)
 
-	room, err := handler.roomUseCase.GetRoomById(roomId)
+	room, err := handler.roomUseCase.GetRoomById(roomId, claims.UserId)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"message": "Room not found",
@@ -108,8 +110,8 @@ func (handler *RoomHandler) AddUserToRoom(ctx *gin.Context) {
 }
 
 func (handler *RoomHandler) GetRoomsByUserId(ctx *gin.Context) {
-	cookieAuth, _ := ctx.Request.Cookie("Authorization")
-	claims, _ := handler.sessionManager.GetCredentials(cookieAuth.Value)
+	authCookie, _ := ctx.Request.Cookie("Authorization")
+	claims, _ := handler.sessionManager.GetCredentials(authCookie.Value)
 	userId := claims.UserId
 
 	rooms, err := handler.roomUseCase.GetRoomsByUserId(userId)
@@ -123,8 +125,8 @@ func (handler *RoomHandler) GetRoomsByUserId(ctx *gin.Context) {
 }
 
 func (handler *RoomHandler) NewRoom(ctx *gin.Context) {
-	cookieAuth, _ := ctx.Request.Cookie("Authorization")
-	claims, _ := handler.sessionManager.GetCredentials(cookieAuth.Value)
+	authCookie, _ := ctx.Request.Cookie("Authorization")
+	claims, _ := handler.sessionManager.GetCredentials(authCookie.Value)
 	userId := claims.UserId
 
 	request := dtos.NewRoomRequest{}

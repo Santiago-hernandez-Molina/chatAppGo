@@ -8,13 +8,13 @@ import (
 type RoomRepo interface {
 	GetRoomById(roomId int) (*models.Room, error)
 	GetRoomsByUserId(userId int) ([]models.Room, error)
-	NewRoom(room models.Room, userId int) error
+	NewRoom(room *models.Room) error
 	AddUserToRoom(userId int, roomId int) error
 	GetUserRoom(roomId int, userId int) (*models.UserRoom, error)
 }
 
 type RoomUseCase interface {
-	GetRoomById(roomId int) (*models.Room, error)
+	GetRoomById(roomId int, userId int) (*models.Room, error)
 	GetRoomsByUserId(userId int) ([]models.Room, error)
 	NewRoom(room models.Room, userId int) error
 	AddUserToRoom(userId int, roomId int) error

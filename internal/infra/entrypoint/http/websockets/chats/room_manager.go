@@ -1,4 +1,4 @@
-package websockets
+package chats
 
 import (
 	"net/http"
