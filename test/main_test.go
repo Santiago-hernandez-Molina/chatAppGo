@@ -48,10 +48,10 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func MakeRequest(
+func MakeRequest[Body map[string]string | map[string]int](
 	method,
 	url string,
-	body interface{},
+	body Body,
 	isAuthenticatedRequest bool,
 	user map[string]string,
 ) *httptest.ResponseRecorder {
