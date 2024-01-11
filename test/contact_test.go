@@ -33,7 +33,7 @@ var ContactTestCase []ContactTest = []ContactTest{
 		map[string]int{
 			"toUserId": 2,
 		},
-		404,
+		400,
 	},
 	{
 		"Add contact",
