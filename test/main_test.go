@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/config"
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/test/data"
+	datamongo "github.com/Santiago-hernandez-Molina/chatAppBackend/test/data/data_mongo"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -43,9 +43,10 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
-	data.InitDB(config.MONGO_URI, config.DATABASE_NAME)
+	datamongo.InitDB(config.MONGO_URI, config.DATABASE_NAME)
 	exitCode := m.Run()
-	data.CleanDB()
+
+	datamongo.CleanDB()
 	os.Exit(exitCode)
 }
 
