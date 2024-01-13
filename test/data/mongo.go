@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/authentication"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/gateways/authentication"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

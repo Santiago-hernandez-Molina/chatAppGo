@@ -15,9 +15,21 @@ type ContactRequestRepo struct {
 	ctx        context.Context
 }
 
-func (repo *ContactRequestRepo) GetRequestByToUserId(requestId int, userId int) (*models.ContactRequest, error) {
+func (repo *ContactRequestRepo) GetRequestById(requestId int) (*models.ContactRequest, error) {
 	filter := bson.D{
 		{Key: "_id", Value: requestId},
+	}
+	request := models.ContactRequest{}
+	result := repo.collection.FindOne(repo.ctx, filter)
+	err := result.Decode(&request)
+	if err != nil {
+		return nil, err
+	}
+	return &request, nil
+}
+
+func (repo *ContactRequestRepo) GetRequestByToUserId(userId int) (*models.ContactRequest, error) {
+	filter := bson.D{
 		{Key: "touserid", Value: userId},
 	}
 	request := models.ContactRequest{}
@@ -29,12 +41,36 @@ func (repo *ContactRequestRepo) GetRequestByToUserId(requestId int, userId int) 
 	return &request, nil
 }
 
-func (*ContactRequestRepo) GetReceivedRequests(userid int) ([]models.ContactRequest, error) {
-	panic("unimplemented")
+func (repo *ContactRequestRepo) GetReceivedRequests(userid int) ([]models.ContactRequest, error) {
+	filter := bson.D{
+		{Key: "touserid", Value: userid},
+	}
+	requests := []models.ContactRequest{}
+	result, err := repo.collection.Find(repo.ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	err = result.All(repo.ctx, &requests)
+	if err != nil {
+		return nil, err
+	}
+	return requests, nil
 }
 
-func (*ContactRequestRepo) GetSendedRequests(userid int) ([]models.ContactRequest, error) {
-	panic("unimplemented")
+func (repo *ContactRequestRepo) GetSendedRequests(userid int) ([]models.ContactRequest, error) {
+	filter := bson.D{
+		{Key: "fromuserid", Value: userid},
+	}
+	requests := []models.ContactRequest{}
+	result, err := repo.collection.Find(repo.ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	err = result.All(repo.ctx, &requests)
+	if err != nil {
+		return nil, err
+	}
+	return requests, nil
 }
 
 func (repo *ContactRequestRepo) SaveRequest(request *models.ContactRequest) error {

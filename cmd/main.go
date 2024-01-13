@@ -15,12 +15,14 @@ func main() {
 			log.Fatal("Error reading env file")
 		}
 	}
+
 	config.SECRET = os.Getenv("SECRET")
 	config.EMAIL_HOST = os.Getenv("EMAIL_HOST")
 	config.EMAIL_USER = os.Getenv("EMAIL_HOST_USER")
 	config.EMAIL_PASSWORD = os.Getenv("EMAIL_HOST_PASSWORD")
 	config.MONGO_URI = os.Getenv("MONGO_URI")
 	config.DATABASE_NAME = os.Getenv("DATABASE_NAME")
+
 	app := config.ConfigApp()
 	app.Run(":8080")
 }

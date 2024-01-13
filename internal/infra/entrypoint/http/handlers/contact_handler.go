@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 	"github.com/gin-gonic/gin"
@@ -40,12 +42,30 @@ func (handler *ContactRequestHandler) AcceptRequest(ctx *gin.Context) {
 	})
 }
 
-func (*ContactRequestHandler) GetReceivedRequests(ctx *gin.Context) {
-	panic("unimplemented")
+func (handler *ContactRequestHandler) GetReceivedRequests(ctx *gin.Context) {
+	authCookie, _ := ctx.Request.Cookie("Authorization")
+	claims, _ := handler.sessionManager.GetCredentials(authCookie.Value)
+	requests, err := handler.contactRequestUseCase.GetReceivedRequests(claims.UserId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Error Retreiving data",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, requests)
 }
 
-func (*ContactRequestHandler) GetSendedRequests(ctx *gin.Context) {
-	panic("unimplemented")
+func (handler *ContactRequestHandler) GetSendedRequests(ctx *gin.Context) {
+	authCookie, _ := ctx.Request.Cookie("Authorization")
+	claims, _ := handler.sessionManager.GetCredentials(authCookie.Value)
+	requests, err := handler.contactRequestUseCase.GetSendedRequests(claims.UserId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Error Retreiving data",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, requests)
 }
 
 func (handler *ContactRequestHandler) SendRequest(ctx *gin.Context) {
@@ -62,8 +82,14 @@ func (handler *ContactRequestHandler) SendRequest(ctx *gin.Context) {
 	request.FromUserId = claims.UserId
 	err = handler.contactRequestUseCase.SendRequest(&request)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"message": "Cannot found the user",
+		if errors.Is(err, &exceptions.UserNotFound{}) {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"message": "Cannot found the user",
+			})
+			return
+		}
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Request already sended",
 		})
 		return
 	}
@@ -80,6 +106,6 @@ func NewContactRequestHandler(
 ) *ContactRequestHandler {
 	return &ContactRequestHandler{
 		contactRequestUseCase: contactRequestUseCase,
-		sessionManager: sessionManager,
+		sessionManager:        sessionManager,
 	}
 }

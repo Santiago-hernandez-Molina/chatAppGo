@@ -16,11 +16,15 @@ import (
 )
 
 var (
-	App  *gin.Engine
-	Auth *http.Cookie
-
-	MONGO_URI     string
-	DATABASE_NAME string
+	LoginUser = map[string]string{
+		"email":    "juan@gmail.com",
+		"password": "12345678",
+	}
+	LoginUser2 = map[string]string{
+		"email":    "pedro@gmail.com",
+		"password": "12345678",
+	}
+	App *gin.Engine
 )
 
 func init() {
@@ -33,16 +37,13 @@ func init() {
 	config.EMAIL_PASSWORD = os.Getenv("EMAIL_HOST_PASSWORD")
 	config.SECRET = os.Getenv("TEST_SECRET")
 
-	MONGO_URI = os.Getenv("TEST_MONGO_URI")
-	DATABASE_NAME = os.Getenv("TEST_DATABASE_NAME")
-
-	config.MONGO_URI = MONGO_URI
-	config.DATABASE_NAME = DATABASE_NAME
+	config.MONGO_URI = os.Getenv("TEST_MONGO_URI")
+	config.DATABASE_NAME = os.Getenv("TEST_DATABASE_NAME")
 	App = config.ConfigApp()
 }
 
 func TestMain(m *testing.M) {
-	data.InitDB(MONGO_URI, DATABASE_NAME)
+	data.InitDB(config.MONGO_URI, config.DATABASE_NAME)
 	exitCode := m.Run()
 	data.CleanDB()
 	os.Exit(exitCode)
@@ -64,17 +65,6 @@ func MakeRequest[Body map[string]string | map[string]int](
 	App.ServeHTTP(writer, request)
 	return writer
 }
-
-var (
-	LoginUser = map[string]string{
-		"email":    "juan@gmail.com",
-		"password": "12345678",
-	}
-	LoginUser2 = map[string]string{
-		"email":    "pedro@gmail.com",
-		"password": "12345678",
-	}
-)
 
 func authCookie(userAuth map[string]string) *http.Cookie {
 	writer := MakeRequest("POST", "/login", userAuth, false, LoginUser)

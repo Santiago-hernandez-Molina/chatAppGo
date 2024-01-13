@@ -51,10 +51,10 @@ func (repo *UserRepo) ActivateAccount(code int, email string) error {
 	return nil
 }
 
-func (repo *UserRepo) DeleteInactiveUser(email string) error {
+func (repo *UserRepo) DeleteUserByEmailAndStatus(email string, status bool) error {
 	filter := bson.D{
 		{Key: "email", Value: email},
-		{Key: "status", Value: false},
+		{Key: "status", Value: status},
 	}
 	_, err := repo.collection.DeleteOne(repo.ctx, filter)
 	if err != nil {

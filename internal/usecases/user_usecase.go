@@ -3,6 +3,7 @@ package usecases
 import (
 	"errors"
 
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 )
@@ -17,11 +18,6 @@ type UserUseCase struct {
 
 func (useCase *UserUseCase) ActivateAccount(code int, email string) error {
 	err := useCase.repo.ActivateAccount(code, email)
-	return err
-}
-
-func (useCase *UserUseCase) DeleteInactiveUser(email string) error {
-	err := useCase.repo.DeleteInactiveUser(email)
 	return err
 }
 
@@ -66,6 +62,10 @@ func (useCase *UserUseCase) Login(user *models.User) (*models.UserWithToken, err
 }
 
 func (useCase *UserUseCase) Register(user *models.User) error {
+	_, err := useCase.repo.GetUserByEmail(user)
+	if err == nil {
+		return &exceptions.DuplicatedUser{}
+	}
 	if len(user.Password) < 8 {
 		return errors.New("Incorrect Password")
 	}

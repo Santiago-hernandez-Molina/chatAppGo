@@ -10,7 +10,7 @@ type UserRepo interface {
 	GetUserById(userId int) (*models.User, error)
 	Register(user *models.User) error
 	DeleteUser(userId int) error
-	DeleteInactiveUser(email string) error
+	DeleteUserByEmailAndStatus(email string, status bool) error
 	ActivateAccount(code int, email string) error
 }
 

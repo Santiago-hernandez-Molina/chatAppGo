@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/repository/mongo/data"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/gateways/repository/mongo/data"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

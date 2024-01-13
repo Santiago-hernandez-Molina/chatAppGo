@@ -9,7 +9,8 @@ type ContactRequestRepo interface {
 	SaveRequest(request *models.ContactRequest) error
 	GetSendedRequests(userid int) ([]models.ContactRequest, error)
 	GetReceivedRequests(userid int) ([]models.ContactRequest, error)
-	GetRequestByToUserId(requestId int, userId int) (*models.ContactRequest, error)
+	GetRequestByToUserId(userId int) (*models.ContactRequest, error)
+	GetRequestById(requestId int) (*models.ContactRequest, error)
 }
 
 type ContactRequestUseCase interface {

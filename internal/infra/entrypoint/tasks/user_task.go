@@ -13,7 +13,7 @@ type UserTask struct {
 func (task *UserTask) DeleteAccountTask(email string) error {
 	wait := time.Minute * 10
 	time.Sleep(wait)
-	err := task.userRepo.DeleteInactiveUser(email)
+	err := task.userRepo.DeleteUserByEmailAndStatus(email, false)
 	if err != nil {
 		return err
 	}

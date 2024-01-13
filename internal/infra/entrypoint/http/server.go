@@ -90,6 +90,8 @@ func (server *Server) authRoutes(app *gin.Engine) {
 func (server *Server) contactRequestRoutes(app *gin.RouterGroup) {
 	contactRoutes := app.Group("/contact/")
 	contactRoutes.POST("/new", server.contactRequestHandler.SendRequest)
+	contactRoutes.POST("/find/received", server.contactRequestHandler.GetReceivedRequests)
+	contactRoutes.POST("/find/sended", server.contactRequestHandler.GetSendedRequests)
 	contactRoutes.POST("/accept/:requestid", server.contactRequestHandler.AcceptRequest)
 }
 

@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type LoginTest struct {
+type ModelTest struct {
 	Name   string
 	Args   map[string]string
 	Status int
 }
 
-var LoginTestCase []LoginTest = []LoginTest{
+var LoginTestCase []ModelTest = []ModelTest{
 	{
 		"User log-in successfully",
 		map[string]string{
@@ -38,9 +38,11 @@ var LoginTestCase []LoginTest = []LoginTest{
 	},
 }
 
+
 func TestLogin(t *testing.T) {
 	for _, user := range LoginTestCase {
-		w := MakeRequest("POST", "/login", user.Args, false, LoginUser)
+		w := MakeRequest("POST", "/login", user.Args, false, nil)
 		assert.Equal(t, user.Status, w.Code)
 	}
 }
+

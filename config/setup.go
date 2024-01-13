@@ -4,14 +4,14 @@ import (
 	"context"
 	"log"
 
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/authentication"
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/email"
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/repository/mongo"
-	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/adapter/tasks"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/handlers"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/middlewares"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/http/websockets/chats"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/entrypoint/tasks"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/gateways/authentication"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/gateways/email"
+	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/infra/gateways/repository/mongo"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/usecases"
 	"github.com/gin-gonic/gin"
 )
@@ -59,6 +59,7 @@ func ConfigApp() *gin.Engine {
 	contactRequestUseCase := usecases.NewContactRequestUseCase(
 		contactRequestRepo,
 		roomRepo,
+		userRepo,
 	)
 	userUseCase := usecases.NewUserUseCase(
 		userRepo,
