@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
@@ -83,8 +84,13 @@ func (repo *UserRepo) GetUserByEmail(user *models.User) (*models.User, error) {
 	filter := bson.D{{Key: "email", Value: user.Email}}
 	result := repo.collection.FindOne(repo.ctx, filter)
 	err := result.Decode(&userDB)
-	if err == mongo.ErrNoDocuments {
-		return nil, errors.New("no user found")
+	if err != nil {
+
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("no user found")
+		}
+		log.Println(err)
+		return nil, err
 	}
 	return &userDB, nil
 }

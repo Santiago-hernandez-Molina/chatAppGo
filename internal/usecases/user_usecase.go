@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"errors"
+	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
@@ -37,6 +38,7 @@ func (useCase *UserUseCase) GetCredentials(token string) (*models.User, error) {
 func (useCase *UserUseCase) Login(user *models.User) (*models.UserWithToken, error) {
 	userDB, err := useCase.repo.GetUserByEmail(user)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	if userDB.Status == false {
