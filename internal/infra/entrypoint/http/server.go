@@ -49,6 +49,7 @@ func (server *Server) SetupServer() *gin.Engine {
 	server.roomRoutes(v1)
 	server.messagesRoutes(v1)
 	server.contactRequestRoutes(v1)
+	server.userRoutes(v1)
 	
 	return app
 }
@@ -83,6 +84,12 @@ func (server *Server) authRoutes(app *gin.Engine) {
 	app.POST("register", server.userHandler.Register)
 	app.POST("login", server.userHandler.Login)
 	app.POST("activate", server.userHandler.ActivateAccount)
+}
+
+// User Routes
+func (server *Server) userRoutes(app *gin.RouterGroup) {
+	userRoutes := app.Group("/user/")
+	userRoutes.GET("/find", server.userHandler.GetUsers)
 }
 
 // ContactRequestHandler Routes

@@ -57,7 +57,10 @@ func (client *Client) Read(wg *sync.WaitGroup) {
 			client.conn.Close()
 			return
 		}
-		err = client.messageUseCase.SaveMessage(&models.Message{
+		if message.Content == "" {
+			continue
+		}
+		id, err := client.messageUseCase.SaveMessage(&models.Message{
 			Content: message.Content,
 			UserId:  client.user.Id,
 			RoomId:  client.hub.id,
@@ -67,10 +70,12 @@ func (client *Client) Read(wg *sync.WaitGroup) {
 			client.conn.Close()
 			return
 		}
+		message.Id = id
 		message.User = client.user
 		client.hub.inbound <- MessageWithClientId{
 			message:  message,
 			clientId: client.id,
 		}
+
 	}
 }

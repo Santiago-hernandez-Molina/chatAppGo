@@ -9,6 +9,7 @@ import (
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -16,6 +17,90 @@ type UserRepo struct {
 	mongoRepo  *MongoRepo
 	collection *mongo.Collection
 	ctx        context.Context
+}
+
+func (repo *UserRepo) GetUsersCount(filter string) (int, error) {
+	regexFilter := primitive.Regex{Pattern: filter, Options: "i"} // "i" para hacer la búsqueda sin distinción entre mayúsculas y minúsculas
+	filterQuery := bson.M{"username": regexFilter}
+
+	count, err := repo.collection.CountDocuments(repo.ctx, filterQuery)
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
+func (repo *UserRepo) GetUsersByUsername(userId int, filter string, size int, offset int) (*models.PaginatedModel[models.UserContact], error) {
+	regexFilter := primitive.Regex{Pattern: filter, Options: "i"}
+	filterQuery := bson.M{"username": regexFilter}
+	pipeline := []bson.M{
+		{
+			"$match": filterQuery,
+		},
+		{
+			"$lookup": bson.M{
+				"from": "contactRequests",
+				"let":  bson.M{"userid": "$_id"},
+				"pipeline": []bson.M{{
+					"$match": bson.M{"$expr": bson.M{
+						"$or": bson.A{
+							bson.D{{Key: "$and", Value: bson.A{
+								bson.M{"$eq": bson.A{"$fromuserid", userId}},
+								bson.M{"$eq": bson.A{"$touserid", "$$userid"}},
+								bson.M{"$eq": bson.A{"$accepted", true}},
+							}}},
+							bson.D{{Key: "$and", Value: bson.A{
+								bson.M{"$eq": bson.A{"$fromuserid", "$$userid"}},
+								bson.M{"$eq": bson.A{"$touserid", userId}},
+								bson.M{"$eq": bson.A{"$accepted", true}},
+							}}},
+						},
+					}},
+				}},
+				"as": "userContact",
+			},
+		},
+		{
+			"$project": bson.M{
+				"_id":      1,
+				"username": 1,
+				"isContact": bson.M{
+					"$ifNull": bson.A{
+						bson.D{{Key: "$arrayElemAt", Value: bson.A{"$userContact.accepted", 0}}},
+						false,
+					},
+				},
+			},
+		},
+		{
+			"$skip": offset,
+		},
+		{
+			"$limit": size,
+		},
+	}
+
+	users := []models.UserContact{}
+
+	cursor, err := repo.collection.Aggregate(repo.ctx, pipeline)
+	defer cursor.Close(repo.ctx)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	err = cursor.All(repo.ctx, &users)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	paginatedModel := models.PaginatedModel[models.UserContact]{
+		Offset: offset,
+		Limit:  size,
+		Data:   users,
+	}
+
+	return &paginatedModel, nil
 }
 
 func (repo *UserRepo) GetUserById(userId int) (*models.User, error) {
@@ -85,11 +170,9 @@ func (repo *UserRepo) GetUserByEmail(user *models.User) (*models.User, error) {
 	result := repo.collection.FindOne(repo.ctx, filter)
 	err := result.Decode(&userDB)
 	if err != nil {
-
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("no user found")
 		}
-		log.Println(err)
 		return nil, err
 	}
 	return &userDB, nil

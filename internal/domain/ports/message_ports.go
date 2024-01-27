@@ -7,12 +7,12 @@ import (
 
 type MessageRepo interface {
 	GetMessagesByRoomId(roomId int) ([]models.MessageUser, error)
-	SaveMessage(message *models.Message) error
+	SaveMessage(message *models.Message) (int, error)
 }
 
 type MessageUseCase interface {
 	GetMessagesByRoomId(roomId int) ([]models.MessageUser, error)
-	SaveMessage(message *models.Message) error
+	SaveMessage(message *models.Message) (int, error)
 }
 
 type MessageHandler interface {

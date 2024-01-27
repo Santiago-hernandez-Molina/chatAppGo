@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"errors"
-	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
@@ -15,6 +14,28 @@ type UserUseCase struct {
 	passwordManager ports.PasswordManager
 	emailSender     ports.EmailSender
 	userTask        ports.UserTask
+}
+
+func (useCase *UserUseCase) GetUsersByUsername(userId int, filter string, size int, offset int) (*models.PaginatedModel[models.UserContact], error) {
+	count, err := useCase.repo.GetUsersCount(filter)
+	if err != nil {
+		return nil, err
+	}
+	if offset > count || offset < 0 || size < 0 {
+		return nil, errors.New("invalid offset")
+	}
+
+	if size == 0 {
+		size = 5
+	}
+
+	paginatedUsers, err := useCase.repo.GetUsersByUsername(userId, filter, size, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	paginatedUsers.Count = count
+	return paginatedUsers, nil
 }
 
 func (useCase *UserUseCase) ActivateAccount(code int, email string) error {
@@ -38,8 +59,7 @@ func (useCase *UserUseCase) GetCredentials(token string) (*models.User, error) {
 func (useCase *UserUseCase) Login(user *models.User) (*models.UserWithToken, error) {
 	userDB, err := useCase.repo.GetUserByEmail(user)
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		return nil, errors.New("something went wrong")
 	}
 	if userDB.Status == false {
 		return nil, errors.New("The account has not been actived")

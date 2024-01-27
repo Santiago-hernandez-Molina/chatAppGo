@@ -71,14 +71,14 @@ func (mr *MessageRepo) GetMessagesByRoomId(roomId int) ([]models.MessageUser, er
 	return messages, nil
 }
 
-func (mr *MessageRepo) SaveMessage(message *models.Message) error {
+func (mr *MessageRepo) SaveMessage(message *models.Message) (int, error) {
 	messsageId := mr.mongoRepo.FindNextId(mr.ctx, "messageid")
 	message.Id = messsageId
 	_, err := mr.collection.InsertOne(mr.ctx, message)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return messsageId, nil
 }
 
 func NewMessageRepo(mongoRepo *MongoRepo, ctx context.Context) *MessageRepo {

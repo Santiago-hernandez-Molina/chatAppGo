@@ -17,11 +17,11 @@ type EmailSender struct {
 func (sender *EmailSender) SendRegisterConfirm(user *models.User, code int) error {
 	auth := smtp.PlainAuth("", sender.emailServer, sender.password, sender.provider)
 	to := []string{user.Email}
-	body := fmt.Sprintf("From: '%s ✉️' <%s>\nSubject:%s\n%s%d",
-		"ChatApp",
+	body := fmt.Sprintf("From: %s <%s>\nSubject:%s\n\n%s\n%d",
+		"ChatApp ✉️",
 		sender.emailServer,
 		"ChatApp Register Code",
-		"This is your activation code, don't share with anyone!! Expires in 10 minutes: ",
+		"This is your activation code,\n don't share with anyone!! Expires in 10 minutes:",
 		code,
 	)
 	msg := []byte(body)

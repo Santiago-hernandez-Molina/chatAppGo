@@ -59,7 +59,6 @@ func createCollections(context context.Context) {
 				{UserId: 0, Role: "admin"},
 				{UserId: 1, Role: "user"},
 				{UserId: 2, Role: "user"},
-				{UserId: 3, Role: "user"},
 			}, Type: models.RoomType(models.Group)},
 		},
 	)

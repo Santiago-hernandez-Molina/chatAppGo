@@ -39,6 +39,7 @@ func (manager *RoomManager) AddClient(
 ) (*Client, error) {
 	manager.mutex.Lock()
 	defer manager.mutex.Unlock()
+
 	conn, err := manager.upgrader.Upgrade(context.Writer, context.Request, nil)
 	if err != nil {
 		return nil, err

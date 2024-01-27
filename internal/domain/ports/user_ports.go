@@ -12,6 +12,8 @@ type UserRepo interface {
 	DeleteUser(userId int) error
 	DeleteUserByEmailAndStatus(email string, status bool) error
 	ActivateAccount(code int, email string) error
+	GetUsersByUsername(userId int, filter string, size int, offset int) (*models.PaginatedModel[models.UserContact], error)
+	GetUsersCount(filter string) (int, error)
 }
 
 type UserUseCase interface {
@@ -20,16 +22,18 @@ type UserUseCase interface {
 	DeleteUser(userId int) error
 	GetCredentials(token string) (*models.User, error)
 	ActivateAccount(code int, email string) error
-}
-
-type UserTask interface {
-	DeleteAccountTask(email string) error
+	GetUsersByUsername(userId int, filter string, size int, offset int) (*models.PaginatedModel[models.UserContact], error)
 }
 
 type UserHandler interface {
 	Login(c *gin.Context)
 	Register(c *gin.Context)
 	ActivateAccount(c *gin.Context)
+	GetUsers(c *gin.Context)
+}
+
+type UserTask interface {
+	DeleteAccountTask(email string) error
 }
 
 // Session Related

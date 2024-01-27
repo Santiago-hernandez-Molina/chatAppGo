@@ -53,7 +53,7 @@ func (useCase *RoomUseCase) GetRoomById(roomId int, userId int) (
 	if err != nil {
 		return nil, err
 	}
-	if room.Type == models.RoomType(models.Group) {
+	if room.Type != models.RoomType(models.Contact) {
 		return room, nil
 	}
 	if room.Users[0].UserId == userId {

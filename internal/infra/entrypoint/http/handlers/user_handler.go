@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
@@ -16,6 +17,39 @@ type UserHandler struct {
 }
 
 var _ ports.UserHandler = (*UserHandler)(nil)
+
+func (handler *UserHandler) GetUsers(c *gin.Context) {
+	usernameParam := c.Query("username")
+	limitParam := c.Query("limit")
+	offsetParam := c.Query("offset")
+	authCookie, _ := c.Cookie("Authorization")
+	claims, _ := handler.sessionManager.GetCredentials(authCookie)
+
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid limit param",
+		})
+		return
+	}
+	offset, err := strconv.Atoi(offsetParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid offset param",
+		})
+		return
+	}
+
+	users, err := handler.userUseCase.GetUsersByUsername(claims.UserId, usernameParam, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Cannot find the users",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+}
 
 func (handler *UserHandler) ActivateAccount(c *gin.Context) {
 	var activationRequest dtos.ActivationRequest
@@ -63,14 +97,14 @@ func (handler *UserHandler) Login(c *gin.Context) {
 		})
 		return
 	}
-	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetSameSite(http.SameSiteDefaultMode)
 	c.SetCookie(
 		"Authorization",
 		userWithToken.Token,
 		14_400,
 		"/",
 		"",
-		true,
+		false,
 		true,
 	)
 	c.JSON(http.StatusOK, &dtos.LoginResponse{

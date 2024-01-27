@@ -9,12 +9,12 @@ type MessageUseCase struct {
 	repo ports.MessageRepo
 }
 
-func (useCase *MessageUseCase) SaveMessage(message *models.Message) error {
-	err := useCase.repo.SaveMessage(message)
+func (useCase *MessageUseCase) SaveMessage(message *models.Message) (int, error) {
+	id, err := useCase.repo.SaveMessage(message)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return id, nil
 }
 
 func (useCase *MessageUseCase) GetMessagesByRoomId(roomId int) ([]models.MessageUser, error) {

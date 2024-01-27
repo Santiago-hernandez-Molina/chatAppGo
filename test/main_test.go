@@ -16,12 +16,16 @@ import (
 )
 
 var (
-	LoginUser = map[string]string{
+	LoginUser = map[string]any{
 		"email":    "juan@gmail.com",
 		"password": "12345678",
 	}
-	LoginUser2 = map[string]string{
+	LoginUser2 = map[string]any{
 		"email":    "pedro@gmail.com",
+		"password": "12345678",
+	}
+	LoginUser3 = map[string]any{
+		"email":    "foobar@gmail.com",
 		"password": "12345678",
 	}
 	App *gin.Engine
@@ -50,12 +54,12 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func MakeRequest[Body map[string]string | map[string]int](
+func MakeRequest[Body map[string]any](
 	method,
 	url string,
 	body Body,
 	isAuthenticatedRequest bool,
-	user map[string]string,
+	user map[string]any,
 ) *httptest.ResponseRecorder {
 	requestBody, _ := json.Marshal(body)
 	request, _ := http.NewRequest(method, url, bytes.NewBuffer(requestBody))
@@ -67,7 +71,7 @@ func MakeRequest[Body map[string]string | map[string]int](
 	return writer
 }
 
-func authCookie(userAuth map[string]string) *http.Cookie {
+func authCookie(userAuth map[string]any) *http.Cookie {
 	writer := MakeRequest("POST", "/login", userAuth, false, LoginUser)
 	cookies := writer.Result().Cookies()
 	for _, cookie := range cookies {
