@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"errors"
+	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
@@ -31,20 +32,26 @@ func (useCase *ContactRequestUseCase) AcceptRequest(requestId int, userId int) e
 	}
 	room.Type = models.RoomType(models.Contact)
 	err = useCase.roomRepo.NewRoom(&room)
+	if err != nil {
+		return err
+	}
+	err = useCase.repo.UpdateRequestStatus(true, requestId)
 	return err
 }
 
-func (useCase *ContactRequestUseCase) GetReceivedRequests(userid int) ([]models.ContactRequest, error) {
+func (useCase *ContactRequestUseCase) GetReceivedRequests(userid int) ([]models.ContactRequestWithUser, error) {
 	requests, err := useCase.repo.GetReceivedRequests(userid)
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
 	return requests, nil
 }
 
-func (useCase *ContactRequestUseCase) GetSendedRequests(userid int) ([]models.ContactRequest, error) {
+func (useCase *ContactRequestUseCase) GetSendedRequests(userid int) ([]models.ContactRequestWithUser, error) {
 	requests, err := useCase.repo.GetSendedRequests(userid)
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
 	return requests, nil

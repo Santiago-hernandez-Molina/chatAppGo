@@ -53,7 +53,7 @@ func TestContact(t *testing.T) {
 		}
 	})
 	t.Run("Get sended requests test", func(t *testing.T) {
-		w := MakeRequest[map[string]any]("POST", "/v1/contact/find/sended", nil, true, LoginUser)
+		w := MakeRequest[map[string]any]("GET", "/v1/contact/find/sended", nil, true, LoginUser)
 		var response []map[string]any
 		json.Unmarshal(w.Body.Bytes(), &response)
 
@@ -61,7 +61,7 @@ func TestContact(t *testing.T) {
 		assert.Equal(t, 2, len(response))
 	})
 	t.Run("Get received requests test", func(t *testing.T) {
-		w := MakeRequest[map[string]any]("POST", "/v1/contact/find/received", nil, true, LoginUser2)
+		w := MakeRequest[map[string]any]("GET", "/v1/contact/find/received", nil, true, LoginUser2)
 		var response []map[string]any
 		json.Unmarshal(w.Body.Bytes(), &response)
 

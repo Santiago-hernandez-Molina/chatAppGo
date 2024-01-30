@@ -35,7 +35,7 @@ func (repo *UserRepo) GetUsersByUsername(userId int, filter string, size int, of
 	filterQuery := bson.M{"username": regexFilter}
 	pipeline := []bson.M{
 		{
-			"$match": filterQuery,
+			"$match": bson.M{"_id": bson.M{"$ne": userId}},
 		},
 		{
 			"$lookup": bson.M{
@@ -47,29 +47,24 @@ func (repo *UserRepo) GetUsersByUsername(userId int, filter string, size int, of
 							bson.D{{Key: "$and", Value: bson.A{
 								bson.M{"$eq": bson.A{"$fromuserid", userId}},
 								bson.M{"$eq": bson.A{"$touserid", "$$userid"}},
-								bson.M{"$eq": bson.A{"$accepted", true}},
 							}}},
 							bson.D{{Key: "$and", Value: bson.A{
 								bson.M{"$eq": bson.A{"$fromuserid", "$$userid"}},
 								bson.M{"$eq": bson.A{"$touserid", userId}},
-								bson.M{"$eq": bson.A{"$accepted", true}},
 							}}},
 						},
 					}},
 				}},
-				"as": "userContact",
+				"as": "joined",
 			},
+		},
+		{
+			"$match": bson.M{"$and": bson.A{filterQuery, bson.M{"joined": []any{}}}},
 		},
 		{
 			"$project": bson.M{
 				"_id":      1,
 				"username": 1,
-				"isContact": bson.M{
-					"$ifNull": bson.A{
-						bson.D{{Key: "$arrayElemAt", Value: bson.A{"$userContact.accepted", 0}}},
-						false,
-					},
-				},
 			},
 		},
 		{

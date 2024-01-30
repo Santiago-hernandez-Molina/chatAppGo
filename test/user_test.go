@@ -43,22 +43,12 @@ var LoginTestCase []ModelTest = []ModelTest{
 
 var GetUsersTestCase []ModelTest = []ModelTest{
 	{
-		"Get 1 user",
-		map[string]any{
-			"username": "pedro",
-			"limit":    "1",
-			"offset":   "0",
-			"users":    1,
-		},
-		200,
-	},
-	{
-		"Get 3 users",
+		"Get 1 users",
 		map[string]any{
 			"username": "",
 			"limit":    "3",
 			"offset":   "0",
-			"users":    3,
+			"users":    1,
 		},
 		200,
 	},

@@ -97,8 +97,8 @@ func (server *Server) userRoutes(app *gin.RouterGroup) {
 func (server *Server) contactRequestRoutes(app *gin.RouterGroup) {
 	contactRoutes := app.Group("/contact/")
 	contactRoutes.POST("/new", server.contactRequestHandler.SendRequest)
-	contactRoutes.POST("/find/received", server.contactRequestHandler.GetReceivedRequests)
-	contactRoutes.POST("/find/sended", server.contactRequestHandler.GetSendedRequests)
+	contactRoutes.GET("/find/received", server.contactRequestHandler.GetReceivedRequests)
+	contactRoutes.GET("/find/sended", server.contactRequestHandler.GetSendedRequests)
 	contactRoutes.POST("/accept/:requestid", server.contactRequestHandler.AcceptRequest)
 }
 
