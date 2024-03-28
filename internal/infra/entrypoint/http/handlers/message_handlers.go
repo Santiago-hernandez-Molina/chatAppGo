@@ -24,12 +24,10 @@ func (mh *MessageHandler) GetMessagesByRoomId(ctx *gin.Context) {
 
 	messages, err := mh.messageUseCase.GetMessagesByRoomId(roomid)
 	if err != nil {
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"message": "cannot find the room",
-			})
-			return
-		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "cannot find the room",
+		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, messages)

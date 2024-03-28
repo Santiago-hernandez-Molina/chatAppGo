@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
@@ -45,14 +46,16 @@ func (repo *ContactRequestRepo) GetRequestById(requestId int) (*models.ContactRe
 	return &request, nil
 }
 
-func (repo *ContactRequestRepo) GetRequestByToUserId(userId int) (*models.ContactRequest, error) {
+func (repo *ContactRequestRepo) GetRequestByToUserId(userId int, fromUserId int) (*models.ContactRequest, error) {
 	filter := bson.D{
 		{Key: "touserid", Value: userId},
+		{Key: "fromuserid", Value: fromUserId},
 	}
 	request := models.ContactRequest{}
 	result := repo.collection.FindOne(repo.ctx, filter)
 	err := result.Decode(&request)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return &request, nil

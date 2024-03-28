@@ -41,6 +41,7 @@ func (useCase *ContactRequestUseCase) AcceptRequest(requestId int, userId int) e
 
 func (useCase *ContactRequestUseCase) GetReceivedRequests(userid int) ([]models.ContactRequestWithUser, error) {
 	requests, err := useCase.repo.GetReceivedRequests(userid)
+	log.Println(requests)
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -60,9 +61,10 @@ func (useCase *ContactRequestUseCase) GetSendedRequests(userid int) ([]models.Co
 func (useCase *ContactRequestUseCase) SendRequest(request *models.ContactRequest) error {
 	_, err := useCase.userRepo.GetUserById(request.ToUserId)
 	if err != nil {
+		log.Println("aaaa")
 		return &exceptions.UserNotFound{}
 	}
-	_, err = useCase.repo.GetRequestByToUserId(request.ToUserId)
+	_, err = useCase.repo.GetRequestByToUserId(request.ToUserId, request.FromUserId)
 	if err == nil {
 		return errors.New("request already sended")
 	}
