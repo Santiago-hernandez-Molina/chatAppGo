@@ -3,7 +3,6 @@ package mongo
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
@@ -80,13 +79,11 @@ func (repo *UserRepo) GetUsersByUsername(userId int, filter string, size int, of
 	cursor, err := repo.collection.Aggregate(repo.ctx, pipeline)
 	defer cursor.Close(repo.ctx)
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 
 	err = cursor.All(repo.ctx, &users)
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 	paginatedModel := models.PaginatedModel[models.UserContact]{

@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/ports"
@@ -55,7 +54,6 @@ func (repo *ContactRequestRepo) GetRequestByToUserId(userId int, fromUserId int)
 	result := repo.collection.FindOne(repo.ctx, filter)
 	err := result.Decode(&request)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	return &request, nil

@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"errors"
-	"log"
 
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/exceptions"
 	"github.com/Santiago-hernandez-Molina/chatAppBackend/internal/domain/models"
@@ -41,9 +40,7 @@ func (useCase *ContactRequestUseCase) AcceptRequest(requestId int, userId int) e
 
 func (useCase *ContactRequestUseCase) GetReceivedRequests(userid int) ([]models.ContactRequestWithUser, error) {
 	requests, err := useCase.repo.GetReceivedRequests(userid)
-	log.Println(requests)
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 	return requests, nil
@@ -52,7 +49,6 @@ func (useCase *ContactRequestUseCase) GetReceivedRequests(userid int) ([]models.
 func (useCase *ContactRequestUseCase) GetSendedRequests(userid int) ([]models.ContactRequestWithUser, error) {
 	requests, err := useCase.repo.GetSendedRequests(userid)
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 	return requests, nil
@@ -61,7 +57,6 @@ func (useCase *ContactRequestUseCase) GetSendedRequests(userid int) ([]models.Co
 func (useCase *ContactRequestUseCase) SendRequest(request *models.ContactRequest) error {
 	_, err := useCase.userRepo.GetUserById(request.ToUserId)
 	if err != nil {
-		log.Println("aaaa")
 		return &exceptions.UserNotFound{}
 	}
 	_, err = useCase.repo.GetRequestByToUserId(request.ToUserId, request.FromUserId)
